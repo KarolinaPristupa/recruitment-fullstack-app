@@ -1,0 +1,52 @@
+@use '@/variables' as *;
+
+.title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  margin-left: $common-space;
+}
+
+.subtitle {
+  font-size: 2rem;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  margin-left: $common-space;
+}
+
+.text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  text-align: justify;
+  text-indent: $common-space; // Абзацный отступ (2em)
+}
+
+.list {
+  padding-left: 20px;
+  margin-bottom: 20px;
+
+  li {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+}
+
+.link {
+  color: white; // Белый цвет ссылки
+  text-decoration: none;
+  transition: background-color 0.3s ease; // Плавное изменение фона
+
+  &:hover {
+    color: $background-color; // Изменение цвета текста при наведении
+    text-decoration: underline;
+  }
+}
+
+.mapContainer {
+  width: 100%;
+  height: 400px;
+  margin-top: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+}

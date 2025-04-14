@@ -1,0 +1,66 @@
+@use '@/variables' as *;
+
+.paginationContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.photosContainer {
+  display: flex;
+  gap: $common-space;
+}
+
+.photoWrapper {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo {
+  width: 250px;
+  height: 300px;
+  object-fit: cover;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photoWrapper:hover .photo {
+  transform: scale(1.05);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.photoWrapper h3 {
+  margin-top: 10px;
+  font-size: 1.2rem;
+}
+
+.photoWrapper p {
+  margin-top: 1px;
+  font-size: 1rem;
+  color: $text-color;
+}
+
+.divider {
+  width: 80%;
+  margin: 10px auto;
+  border: 1px solid #ccc;
+}
+
+.arrowButton {
+  background: none;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+  color: $text-color;
+  transition: color 0.3s ease;
+  margin-top: -110px;
+
+  &:hover {
+    color: $first-accent-color;
+  }
+}

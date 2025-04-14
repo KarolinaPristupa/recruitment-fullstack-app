@@ -1,0 +1,303 @@
+@use '@/variables' as *;
+
+.notificationsWrapper {
+  margin-top: 45px;
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.dropdownMenu {
+  position: absolute;
+  bottom: -80px;
+  right: 8px;
+  border: 1px solid $first-accent-color;
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  min-width: 120px;
+
+  div {
+    padding: 6px 12px;
+    cursor: pointer;
+    color: white;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  &.sentMenu {
+    background: $second-accent-color;
+  }
+
+  &.receivedMenu {
+    background: #444;
+  }
+}
+
+.sidebar {
+  border-color: linear-gradient(to bottom, $second-accent-color, $first-accent-color);
+  border-radius: 10px 0 0 10px;
+  width: 300px;
+  background: linear-gradient(to bottom, $second-accent-color, $first-accent-color);
+  border-right: 1px solid #ccc;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  .chatItem {
+    padding: 10px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: $first-accent-color;
+    }
+  }
+
+  .active {
+    background-color: $second-accent-color;
+    font-weight: bold;
+  }
+}
+
+.chatWindow {
+  border-color: $first-accent-color;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: $first-accent-color;
+  height: 100%;
+  position: relative; /* Для позиционирования тостов */
+}
+
+.chatHeader {
+  padding: 12px;
+  font-weight: bold;
+  font-size: 16px;
+  background-color: $second-accent-color;
+  border-bottom: 1px solid $second-accent-color;
+  text-align: center;
+  color: white;
+}
+
+.messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  position: relative;
+  max-width: 70%;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: white;
+  word-wrap: break-word;
+  border-radius: 16px;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &.sent {
+    border-radius: 16px 16px 0px 16px;
+    align-self: flex-end;
+    background: $second-accent-color;
+  }
+
+  &.received {
+    border-radius: 16px 16px 16px 0px;
+    align-self: flex-start;
+    background-color: #444;
+  }
+}
+
+.messageContent {
+  padding-bottom: 8px;
+
+  .messageText {
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .messageDetails {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-bottom: 4px;
+  }
+
+  input {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    background: #fff;
+    color: #333;
+  }
+
+  input[type="datetime-local"] {
+    padding: 5px;
+  }
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+
+  button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background: $second-accent-color;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: darken($second-accent-color, 10%);
+    }
+
+    &:last-child {
+      background: #666;
+      &:hover {
+        background: darken(#666, 10%);
+      }
+    }
+  }
+}
+
+.messageMeta {
+  position: absolute;
+  bottom: 4px;
+  right: 12px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .response {
+    font-style: italic;
+    opacity: 0.9;
+  }
+}
+
+.emptyChat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+.toastContainer {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.toast {
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  transform: translateY(-10px);
+
+  &.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &.hide {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  &.success {
+    background-color: #28a745;
+  }
+
+  &.error {
+    background-color: #dc3545;
+  }
+}
+
+:global {
+  .react-calendar {
+    width: 100%;
+    max-width: 280px;
+    background-color: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 15px;
+    font-family: $font-family;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    padding: 1rem;
+    color: $second-accent-color;
+  }
+}
+
+.timePicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1rem;
+
+  select {
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: rgba(255, 255, 255, 0.85);
+    color: $second-accent-color;
+    font-size: 14px;
+    font-family: $font-family;
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: $second-accent-color;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $second-accent-color;
+      box-shadow: 0 0 4px rgba($second-accent-color, 0.3);
+    }
+  }
+
+  span {
+    font-size: 16px;
+    color: $second-accent-color;
+  }
+}

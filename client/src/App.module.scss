@@ -1,0 +1,38 @@
+@use './variables' as *;
+@use 'sass:color';
+
+.App {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 600vw;
+}
+
+main {
+    flex: 1;
+    padding: 100px 40px;
+    margin: 0 0;
+    font-family: $font-family;
+    color: white;
+    background: linear-gradient(to bottom, $first-accent-color, $second-accent-color);
+    min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: linear-gradient(to bottom, $first-accent-color, $second-accent-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, $second-accent-color, $first-accent-color);
+    border-radius: 10px;
+    border: 2px solid $first-accent-color;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, color.adjust($second-accent-color, $lightness: -10%), color.adjust($first-accent-color, $lightness: -10%));
+}

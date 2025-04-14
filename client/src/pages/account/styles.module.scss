@@ -1,0 +1,97 @@
+@use '@/variables' as *;
+@use 'sass:color';
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, $first-accent-color, $second-accent-color);
+  font-family: $font-family;
+  color: white;
+}
+
+.formContainer {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.formTitle {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.inputField {
+  width: 94%;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-family: $font-family;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  &:focus {
+    outline: none;
+    background: $first-accent-color;
+  }
+}
+
+.button {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 5px;
+  background: $second-accent-color;
+  color: white;
+  font-family: $font-family;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: color.adjust($second-accent-color, $lightness: -10%);
+  }
+}
+
+.registration{
+  text-align: center;
+  font-size: 10px;
+}
+
+.link {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: $second-accent-color;
+  }
+}
+
+.forgotPasswordLink {
+  text-align: right;
+  margin-bottom: 1rem;
+  font-size: 10px;
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 0.875rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
