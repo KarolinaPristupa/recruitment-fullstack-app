@@ -1,0 +1,147 @@
+@use '@/variables' as *;
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 700px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  max-height: 80vh;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 30px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: $second-accent-color;
+}
+
+:global {
+  .react-calendar {
+    width: 60%;
+    height: 60%;
+    max-width: 500px;
+    max-height: 400px;
+    background-color: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 15px;
+    font-family: $font-family;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    padding: 1rem;
+    margin: 1rem auto;
+    color: $second-accent-color;
+
+    button {
+      background: none;
+      border: none;
+      padding: 0.5rem;
+      margin: 0.1rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: rgba($second-accent-color, 0.1);
+        cursor: pointer;
+      }
+
+      &.react-calendar__tile--active,
+      &.react-calendar__tile--hasActive:enabled {
+        background-color: $second-accent-color !important;
+        color: white !important;
+        border-radius: 10px;
+      }
+
+      &.react-calendar__tile--now {
+        background-color: rgba($second-accent-color, 0.3);
+      }
+    }
+
+    .react-calendar__navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0rem;
+
+      button {
+        font-weight: bold;
+        font-size: 1rem;
+        color: $second-accent-color;
+      }
+    }
+
+    .react-calendar__month-view__weekdays {
+      text-align: center;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.6rem;
+      color: $second-accent-color;
+      margin-bottom: 0.1rem;
+    }
+
+    .react-calendar__tile--now {
+      font-weight: bold;
+      border: 1px solid rgba($second-accent-color, 0.5);
+    }
+  }
+}
+.timeAndButton {
+  display: flex;
+  gap: 0rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0rem;
+  flex-wrap: wrap;
+}
+
+.timeInput {
+  margin-top: 0.2rem;
+  padding: 0.5rem;
+  border: 1px solid $second-accent-color;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 200px;
+  color: $second-accent-color;
+  background-color: rgba(255, 255, 255, 0.9);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+
+.confirmButton {
+  margin-top: 0.8rem;
+  background-color: $second-accent-color;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: darken($second-accent-color, 10%);
+  }
+}

@@ -1,0 +1,52 @@
+@use '@/variables' as *;
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.logo-container {
+    display: flex;
+}
+
+.logo {
+    filter: brightness(0) saturate(100%) invert(79%) sepia(12%) saturate(1232%) hue-rotate(300deg) brightness(107%) contrast(101%);
+    margin: 0px -440px;
+    height: 80px;
+    width: auto;
+}
+
+.castomLogo{
+    filter: brightness(0) saturate(100%) invert(79%) sepia(12%) saturate(1232%) hue-rotate(300deg) brightness(107%) contrast(101%);
+    height: 80px;
+    width: auto;
+    align-items: center;
+    margin: 0px -80px;
+}
+
+.nav {
+    display: flex;
+    gap: $common-space;
+    margin: 0 $common-space 0 30px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: $first-accent-color;
+    font-family: $font-family;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: $second-accent-color;
+}

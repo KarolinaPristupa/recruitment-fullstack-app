@@ -1,0 +1,108 @@
+@use '@/variables' as *;
+
+.vacancies-container {
+    margin: 45px 0 0 0;
+    padding: 20px;
+    background: linear-gradient(to bottom, #f0f0f0, #d9d9d9);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    justify-content: center;
+}
+
+.vacancy-card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    text-align: left;
+    color: $second-accent-color;
+
+&:hover {
+        transform: scale(1.05);
+    }
+
+    h2 {
+        color: $second-accent-color;
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 1.2rem;
+    }
+
+    p {
+        color: $second-accent-color;
+        margin-top: 10px;
+        font-size: 1rem;
+    }
+}
+
+.top-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 30px 0;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.create-button {
+    background-color: $second-accent-color;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+
+    &:hover {
+        background-color: darken($second-accent-color, 10%);
+    }
+}
+
+.search-input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+.status-filter {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.heart-icon {
+    cursor: pointer;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.details-button {
+    margin-top: 15px;
+    background-color: lighten($second-accent-color, 20%);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: $second-accent-color;
+    }
+}
+

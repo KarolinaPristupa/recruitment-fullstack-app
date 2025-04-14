@@ -1,0 +1,227 @@
+@use '@/variables' as *;
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: linear-gradient(to bottom, $second-accent-color, $first-accent-color);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 400px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: left;
+  position: relative;
+  font-family: $font-family;
+  color: $text-color;
+}
+
+.vacancy-title {
+  font-size: 28px;
+  text-align: left;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: $text-color;
+}
+
+.info-block {
+  p {
+    margin: 8px 0;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: pre-line;
+    color: $text-color;
+
+    strong {
+      font-weight: 600;
+    }
+  }
+}
+
+.close-btn {
+  background-color: transparent;
+  color: $text-color;
+  font-size: 26px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.vacancy-title {
+  font-size: 28px;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.status-top-right {
+  position: absolute;
+  top: 28px;
+  right: 25px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.status {
+  &.active {
+    color: #7fffb4;
+  }
+  &.inactive {
+    color: #ff8075;
+  }
+  &.frozen {
+    color: #78c9ff;
+  }
+}
+
+.info-block p {
+  margin: 8px 0;
+  font-size: 16px;
+  white-space: pre-line;
+}
+
+.salary-block {
+  margin-top: 10px;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: left;
+}
+
+.creator-block {
+  margin-top: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.bottom-actions-block {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.action-btn {
+  background-color: white;
+  color: $second-accent-color;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: opacity 0.3s ease;
+  flex: 1 1 100%;
+  max-width: 100%;
+}
+
+.action-btn:hover {
+  opacity: 0.85;
+}
+
+.icon-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.icon-wrapper {
+  background-color: $second-accent-color;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.icon-wrapper:hover {
+  transform: scale(1.05);
+}
+
+.icon-btn {
+  cursor: pointer;
+  color: white;
+  width: 24px;
+  height: 24px;
+}
+
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.delete-confirm-content {
+  background: $second-accent-color;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 300px;
+  max-width: 90%;
+  text-align: center;
+  font-family: $font-family;
+  color: $text-color
+}
+
+.delete-confirm-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.confirm-btn,
+.cancel-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: opacity 0.3s ease;
+  width: 100px;
+}
+
+.confirm-btn {
+  background-color: #ff5e5e;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #7fffb4;
+  color: white;
+}
+
+.confirm-btn:hover,
+.cancel-btn:hover {
+  opacity: 0.85;
+}

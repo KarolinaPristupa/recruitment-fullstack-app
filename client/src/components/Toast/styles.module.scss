@@ -1,0 +1,36 @@
+@use '@/variables' as *;
+
+.toast {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-family: $font-family;
+  font-size: 16px;
+  color: $text-color;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: top 0.5s ease-in-out, opacity 0.5s ease-in-out;
+  opacity: 0;
+  white-space: nowrap;
+}
+
+.show {
+  top: 20px;
+  opacity: 1;
+}
+
+.hide {
+  top: -50px; /* Исчезает */
+  opacity: 0;
+}
+
+.success {
+  background-color: $second-accent-color;
+}
+
+.error {
+  background-color: #d9534f;
+}
