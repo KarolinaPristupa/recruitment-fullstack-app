@@ -10,6 +10,7 @@ public class Vacancy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer vacancies_id;
 
+    @Column(name = "position_title")
     private String position;
     private String department;
     private String requirements;

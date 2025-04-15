@@ -92,7 +92,7 @@ const Modal_employee = ({ vacancy, currentUser, onClose, onDelete }) => {
 
             await axios.post(
                 "http://localhost:1111/api/responses",
-                { vacancyId }, // ключ должен быть точно таким, как на сервере
+                { vacancyId },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -122,14 +122,14 @@ const Modal_employee = ({ vacancy, currentUser, onClose, onDelete }) => {
                     <span className={clsx(styles.status, statusClass)}>{vacancy.status}</span>
                 </div>
 
-                <h2 className={styles["vacancy-title"]}>{vacancy.position_title}</h2>
+                <h2 className={styles["vacancy-title"]}>{vacancy.position}</h2>
 
                 <div className={styles["info-block"]}>
                     <p><strong>Отдел:</strong> {vacancy.department}</p>
                     <p><strong>Требования:</strong> {vacancy.requirements}</p>
                     <p><strong>Описание:</strong> {vacancy.description}</p>
                     <div className={styles["salary-block"]}>
-                        <strong>Зарплата:</strong> {vacancy.salary} USD
+                        <strong>Зарплата:</strong> {vacancy.salary} BYN
                     </div>
                 </div>
 
