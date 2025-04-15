@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { Pencil, Trash2, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Toast from "@components/Toast";
+import Toast from "@components/toast";
 
 const Modal_employee = ({ vacancy, currentUser, onClose, onDelete }) => {
     if (!vacancy || !currentUser) return null;

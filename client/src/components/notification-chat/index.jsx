@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useNotifications from '@hooks/useNotifications';
 import styles from '@pages/notifications/styles.module.scss';
-import Toast from '@components/Toast';
+import Toast from '@components/toast';
 
 const NotificationChat = ({ selectedChat }) => {
     const { messages, updateMessageResponse, editMessage, deleteMessage } = useNotifications(selectedChat);

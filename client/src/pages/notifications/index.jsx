@@ -1,6 +1,6 @@
 import React from 'react';
-import NotificationSidebar from '@components/NotificationSidebar';
-import NotificationChat from '@components/NotificationChat';
+import NotificationSidebar from '@components/notification-sidebar';
+import NotificationChat from '@components/notification-chat';
 import styles from '@pages/notifications/styles.module.scss';
 
 const Notifications = () => {

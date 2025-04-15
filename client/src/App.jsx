@@ -13,10 +13,9 @@ import Vacancies from "@pages/vacancies";
 // import Users from "@pages/users";
 import Notifications from "@pages/notifications";
 import Candidates from "@pages/candidates";
-import CreateVacancy from "@pages/createVacancy";
-import VacancyEdit from "@pages/editVacancy";
-import InviteCandidate from "@pages/inviteCandidate";
-import Modal_invite from "@components/Modal_invite/index.jsx";
+import CreateVacancy from "@pages/create-vacancy";
+import VacancyEdit from "@pages/edit-vacancy";
+import InviteCandidate from "@pages/invite-candidate";
 function App() {
     return (
         <Router>
@@ -41,7 +40,6 @@ function App() {
                         <Route path="/candidates" element={<Candidates />} />
 
                         <Route path="/candidates/invite" element={<InviteCandidate />} />
-                        <Route path="/candidates/invite/select" element={<Modal_invite />} />
                     </Routes>
                 </main>
                 <Footer />

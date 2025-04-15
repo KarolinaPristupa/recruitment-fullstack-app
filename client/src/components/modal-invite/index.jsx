@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import Calendar from "react-calendar";
 import { FaTimes } from "react-icons/fa";
-import Toast from "@components/Toast";
+import Toast from "@components/toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import styles from "./styles.module.scss";
 import "react-calendar/dist/Calendar.css";
 
-const Modal_invite = ({ onClose, candidate, vacancy }) => {
+const ModalInvite = ({ onClose, candidate, vacancy }) => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedTime, setSelectedTime] = useState("12:00");
     const [toast, setToast] = useState({ show: false, message: "", type: "" });
@@ -114,4 +114,4 @@ const Modal_invite = ({ onClose, candidate, vacancy }) => {
     );
 };
 
-export default Modal_invite;
+export default ModalInvite;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import PersonalDataForm from "@components/PersonalDataForm/index.jsx";
-import EmployeeProfile from "@components/EmployeeProfile/index.jsx";
+import PersonalDataForm from "@components/personal-data-form/index.jsx";
+import EmployeeProfile from "@components/employee-profile/index.jsx";
 import styles from "@pages/candidate/styles.module.scss";
 
 const Employee = () => {

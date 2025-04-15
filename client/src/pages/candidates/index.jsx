@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaGraduationCap, FaTools, FaEnvelope, FaPhone } from "react-icons/fa"; // Иконки
 import styles from "./styles.module.scss";
-import Modal_candidate from "@components/Modal_candidate"; // Импортируем модальное окно
+import Modal_candidate from "@components/modal-candidate"; // Импортируем модальное окно
 
 const Candidates = () => {
     const [candidates, setCandidates] = useState([]);

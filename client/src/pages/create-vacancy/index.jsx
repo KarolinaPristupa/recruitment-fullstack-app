@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-import Toast from "@components/Toast";
+import Toast from "@components/toast";
 import styles from "./styles.module.scss";
 
 const CreateVacancy = () => {
