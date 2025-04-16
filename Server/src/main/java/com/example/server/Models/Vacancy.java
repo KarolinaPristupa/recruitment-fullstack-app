@@ -21,4 +21,5 @@ public class Vacancy {
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
+
 }

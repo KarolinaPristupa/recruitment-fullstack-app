@@ -95,9 +95,7 @@ public class NotificationsController {
                 if (invite.isPresent()) {
                     map.put("date", invite.get().getDate().toString());
                     map.put("type", "invite");
-                } else if (n.getResponseEntity() != null) {
-                    map.put("vacancyName", n.getResponseEntity().getVacancy() != null ? n.getResponseEntity().getVacancy().getPosition() : null);
-                    map.put("type", "response");
+
                 } else {
                     map.put("type", "message");
                 }
