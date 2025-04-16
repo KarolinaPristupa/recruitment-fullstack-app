@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class ResponseService {
 
@@ -110,5 +112,12 @@ public class ResponseService {
 
     public Response save(Response response) {
         return responseRepository.save(response);
+    }
+
+    public Optional<Response> findByNotificationId(Integer notificationId) {
+        logger.info("Finding response by notificationId={}", notificationId);
+        Optional<Response> response = responseRepository.findByNotification_NotificationId(notificationId);
+        logger.debug("Response found: {}", response.isPresent());
+        return response;
     }
 }

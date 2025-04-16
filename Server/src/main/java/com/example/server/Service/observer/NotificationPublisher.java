@@ -24,4 +24,10 @@ public class NotificationPublisher implements Observable {
             observer.update(eventType, entity, sender, recipient);
         }
     }
+
+    public void notifyObservers(String eventType, Object entity, User sender, User recipient, String message, String details) {
+        for (Observer observer : observers) {
+            observer.update(eventType, entity, sender, recipient, message, details);
+        }
+    }
 }

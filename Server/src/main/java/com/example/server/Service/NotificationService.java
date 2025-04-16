@@ -25,6 +25,7 @@ public class NotificationService implements Observer {
     private final InviteRepository inviteRepository;
     private final ResponseRepository responseRepository;
     private final VacancyRepository vacancyRepository;
+    private final InterviewService interviewService;
     private final NotificationPublisher notificationPublisher;
 
     public NotificationService(
@@ -33,6 +34,7 @@ public class NotificationService implements Observer {
             InviteRepository inviteRepository,
             ResponseRepository responseRepository,
             VacancyRepository vacancyRepository,
+            InterviewService interviewService,
             NotificationPublisher notificationPublisher
     ) {
         this.notificationRepository = notificationRepository;
@@ -40,8 +42,9 @@ public class NotificationService implements Observer {
         this.inviteRepository = inviteRepository;
         this.responseRepository = responseRepository;
         this.vacancyRepository = vacancyRepository;
+        this.interviewService = interviewService;
         this.notificationPublisher = notificationPublisher;
-        this.notificationPublisher.subscribe(this); // Subscribe to events
+        this.notificationPublisher.subscribe(this);
     }
 
     public Notification save(Notification notification) {
@@ -66,7 +69,6 @@ public class NotificationService implements Observer {
         String message = "";
         String details = "";
 
-        // Skip notification creation for CREATE events, as it's handled in InviteService/ResponseService
         if ("CREATE".equals(eventType)) {
             return;
         }
@@ -104,14 +106,15 @@ public class NotificationService implements Observer {
         }
 
         if (!message.isEmpty()) {
-            Notification notification = createNotification(message, details, sender, recipient);
-            if (entity instanceof Invite) {
-                ((Invite) entity).setNotification(notification);
-                inviteRepository.save((Invite) entity);
-            } else if (entity instanceof Response) {
-                ((Response) entity).setNotification(notification);
-                responseRepository.save((Response) entity);
-            }
+            createNotification(message, details, sender, recipient);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void update(String eventType, Object entity, User sender, User recipient, String message, String details) {
+        if ("CUSTOM".equals(eventType)) {
+            createNotification(message, details, sender, recipient);
         }
     }
 
@@ -248,7 +251,8 @@ public class NotificationService implements Observer {
         logger.info("Notification deleted: notificationId={}", notificationId);
     }
 
-    public void updateNotificationResponse(Integer notificationId, Integer userId, String response) {
+    @Transactional
+    public void updateNotificationResponse(Integer notificationId, Integer userId, String response, LocalDateTime interviewDate) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> {
                     logger.error("Notification not found: notificationId={}", notificationId);
@@ -260,8 +264,80 @@ public class NotificationService implements Observer {
             throw new RuntimeException("No permission to respond");
         }
 
+        if (!response.equals("Согласие") && !response.equals("Отказ")) {
+            logger.error("Invalid response: {}", response);
+            throw new RuntimeException("Invalid response: must be 'Согласие' or 'Отказ'");
+        }
+
         notification.setResponse(response);
         notificationRepository.save(notification);
-        logger.info("Response updated: notificationId={}, response={}", notificationId, response);
+        logger.info("Notification response updated: notificationId={}, response={}", notificationId, response);
+
+        Optional<Invite> inviteOpt = inviteRepository.findByNotification_NotificationId(notificationId);
+        Optional<Response> responseOpt = responseRepository.findByNotification_NotificationId(notificationId);
+
+        if (inviteOpt.isPresent()) {
+            handleInviteResponse(inviteOpt.get(), response, notification);
+        } else if (responseOpt.isPresent()) {
+            handleResponseResponse(responseOpt.get(), response, notification, interviewDate);
+        } else {
+            logger.error("No Invite or Response found for notification: notificationId={}", notificationId);
+            throw new RuntimeException("No associated Invite or Response found");
+        }
+    }
+
+    private void handleInviteResponse(Invite invite, String response, Notification notification) {
+        User sender = notification.getRecipient(); // Employer responding
+        User recipient = notification.getSender(); // Candidate who sent the invite
+        Vacancy vacancy = invite.getVacancy();
+        Candidate candidate = invite.getCandidate();
+        LocalDateTime date = invite.getDate();
+
+        if (response.equals("Согласие")) {
+            // Create Interview
+            interviewService.createInterview(candidate, vacancy, date);
+            // Send new notification
+            String message = String.format("Назначено собеседование на вакансию: %s", vacancy.getPosition());
+            String details = String.format("Дата: %s, Время: %s", date.toLocalDate(), date.toLocalTime().withSecond(0).withNano(0));
+            notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
+            // Delete Invite
+            inviteRepository.delete(invite);
+        } else {
+            // Send rejection notification
+            String message = String.format("Отказ от приглашения на вакансию: %s", vacancy.getPosition());
+            String details = "Кандидат отказался от собеседования";
+            notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
+            // Delete Invite
+            inviteRepository.delete(invite);
+        }
+    }
+
+    private void handleResponseResponse(Response responseEntity, String response, Notification notification, LocalDateTime interviewDate) {
+        User sender = notification.getRecipient(); // Employer responding
+        User recipient = notification.getSender(); // Candidate who sent the response
+        Vacancy vacancy = responseEntity.getVacancy();
+        Candidate candidate = responseEntity.getCandidate();
+
+        if (response.equals("Согласие")) {
+            if (interviewDate == null) {
+                logger.error("Interview date required for Response acceptance: notificationId={}", notification.getNotificationId());
+                throw new RuntimeException("Interview date is required for acceptance");
+            }
+            // Create Interview
+            interviewService.createInterview(candidate, vacancy, interviewDate);
+            // Send new notification
+            String message = String.format("Назначено собеседование на вакансию: %s", vacancy.getPosition());
+            String details = String.format("Дата: %s, Время: %s", interviewDate.toLocalDate(), interviewDate.toLocalTime().withSecond(0).withNano(0));
+            notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
+            // Delete Response
+            responseRepository.delete(responseEntity);
+        } else {
+            // Send rejection notification
+            String message = String.format("Отказ в собеседовании на вакансию: %s", vacancy.getPosition());
+            String details = "Работодатель отказал в собеседовании";
+            notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
+            // Delete Response
+            responseRepository.delete(responseEntity);
+        }
     }
 }

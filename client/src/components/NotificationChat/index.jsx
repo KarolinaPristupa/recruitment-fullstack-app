@@ -7,6 +7,8 @@ const NotificationChat = ({ selectedChat }) => {
     const { messages, updateMessageResponse, editMessage, deleteMessage } = useNotifications(selectedChat);
     const [openMenuIndex, setOpenMenuIndex] = useState(null);
     const [editingMessage, setEditingMessage] = useState(null);
+    const [showCalendar, setShowCalendar] = useState(null);
+    const [interviewDate, setInterviewDate] = useState('');
     const [toasts, setToasts] = useState([]);
     const menuRef = useRef(null);
 
@@ -41,7 +43,7 @@ const NotificationChat = ({ selectedChat }) => {
     };
 
     const handleEditStart = (msg) => {
-        setEditingMessage({ ...msg });
+        setEditingMessage({ ...msg, date: msg.date ? new Date(msg.date).toISOString().slice(0, 16) : '' });
         setOpenMenuIndex(null);
     };
 
@@ -53,7 +55,9 @@ const NotificationChat = ({ selectedChat }) => {
                     addToast('Укажите дату и время', 'error');
                     return;
                 }
-                result = await editMessage(editingMessage.notificationId, null, editingMessage.date, null);
+                const date = new Date(editingMessage.date);
+                const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:00`;
+                result = await editMessage(editingMessage.notificationId, null, formattedDate, null);
             } else if (editingMessage.type === 'response') {
                 if (!editingMessage.vacancyName) {
                     addToast('Укажите название вакансии', 'error');
@@ -91,11 +95,31 @@ const NotificationChat = ({ selectedChat }) => {
         }
     };
 
-    const handleResponse = async (notificationId, response) => {
-        const result = await updateMessageResponse(notificationId, response);
+    const handleResponse = async (notificationId, response, msg) => {
+        if (response === 'Согласие' && msg.type === 'response') {
+            setShowCalendar(notificationId);
+            setOpenMenuIndex(null);
+        } else {
+            const result = await updateMessageResponse(notificationId, response, null, msg.type);
+            if (result.success) {
+                addToast(result.message, 'success');
+                setOpenMenuIndex(null);
+            } else {
+                addToast(result.error, 'error');
+            }
+        }
+    };
+
+    const handleCalendarSubmit = async (notificationId) => {
+        if (!interviewDate) {
+            addToast('Укажите дату и время', 'error');
+            return;
+        }
+        const result = await updateMessageResponse(notificationId, 'Согласие', new Date(interviewDate), 'response');
         if (result.success) {
             addToast(result.message, 'success');
-            setOpenMenuIndex(null);
+            setShowCalendar(null);
+            setInterviewDate('');
         } else {
             addToast(result.error, 'error');
         }
@@ -118,13 +142,15 @@ const NotificationChat = ({ selectedChat }) => {
                                     {editingMessage.type === 'invite' ? (
                                         <input
                                             type="datetime-local"
-                                            value={editingMessage.date ? new Date(editingMessage.date).toISOString().slice(0, 16) : ''}
+                                            className={styles.calendarInput}
+                                            value={editingMessage.date}
                                             onChange={(e) => setEditingMessage({ ...editingMessage, date: e.target.value })}
                                             min={new Date().toISOString().slice(0, 16)}
                                         />
                                     ) : editingMessage.type === 'response' ? (
                                         <input
                                             type="text"
+                                            className={styles.textInput}
                                             value={editingMessage.vacancyName || ''}
                                             onChange={(e) => setEditingMessage({ ...editingMessage, vacancyName: e.target.value })}
                                             placeholder="Название вакансии"
@@ -132,6 +158,7 @@ const NotificationChat = ({ selectedChat }) => {
                                     ) : (
                                         <input
                                             type="text"
+                                            className={styles.textInput}
                                             value={editingMessage.details || ''}
                                             onChange={(e) => setEditingMessage({ ...editingMessage, details: e.target.value })}
                                             placeholder="Детали"
@@ -168,14 +195,29 @@ const NotificationChat = ({ selectedChat }) => {
                                             </>
                                         ) : (
                                             <>
-                                                <div onClick={() => handleResponse(msg.notificationId, 'Согласиться')}>
+                                                <div onClick={() => handleResponse(msg.notificationId, 'Согласие', msg)}>
                                                     Согласиться
                                                 </div>
-                                                <div onClick={() => handleResponse(msg.notificationId, 'Отказаться')}>
+                                                <div onClick={() => handleResponse(msg.notificationId, 'Отказ', msg)}>
                                                     Отказаться
                                                 </div>
                                             </>
                                         )}
+                                    </div>
+                                )}
+                                {showCalendar === msg.notificationId && (
+                                    <div className={styles.calendarPopup}>
+                                        <input
+                                            type="datetime-local"
+                                            className={styles.calendarInput}
+                                            value={interviewDate}
+                                            onChange={(e) => setInterviewDate(e.target.value)}
+                                            min={new Date().toISOString().slice(0, 16)}
+                                        />
+                                        <div className={styles.calendarActions}>
+                                            <button onClick={() => handleCalendarSubmit(msg.notificationId)}>Подтвердить</button>
+                                            <button onClick={() => setShowCalendar(null)}>Отмена</button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
