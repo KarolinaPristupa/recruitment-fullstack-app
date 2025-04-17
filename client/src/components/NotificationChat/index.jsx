@@ -8,7 +8,9 @@ import { jwtDecode } from 'jwt-decode';
 import 'react-calendar/dist/Calendar.css';
 
 const NotificationChat = ({ selectedChat }) => {
-    const { messages, updateMessageResponse, editMessage, deleteMessage } = useNotifications(selectedChat?.recipientId !== 'interviews' ? selectedChat : null);
+    const { messages, updateMessageResponse, editMessage, deleteMessage } = useNotifications(
+        selectedChat && selectedChat.recipientId !== 'interviews' ? selectedChat : null
+    );
     const [openMenuIndex, setOpenMenuIndex] = useState(null);
     const [editingMessage, setEditingMessage] = useState(null);
     const [showCalendar, setShowCalendar] = useState(null);
@@ -16,6 +18,7 @@ const NotificationChat = ({ selectedChat }) => {
     const [toasts, setToasts] = useState([]);
     const [interviews, setInterviews] = useState([]);
     const [userRole, setUserRole] = useState(null);
+    const [openInterviewMenu, setOpenInterviewMenu] = useState(null);
     const menuRef = useRef(null);
 
     const addToast = (message, type) => {
@@ -41,7 +44,7 @@ const NotificationChat = ({ selectedChat }) => {
     }, []);
 
     useEffect(() => {
-        if (selectedChat?.recipientId === 'interviews') {
+        if (selectedChat && selectedChat.recipientId === 'interviews') {
             const fetchInterviews = async () => {
                 try {
                     const res = await axios.get('http://localhost:1111/api/interviews', {
@@ -62,22 +65,50 @@ const NotificationChat = ({ selectedChat }) => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
+                console.log('Закрытие меню: клик вне меню');
                 setOpenMenuIndex(null);
+                setOpenInterviewMenu(null);
             }
         };
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('click', handleClickOutside); // Используем click вместо mousedown
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('click', handleClickOutside);
         };
     }, []);
 
     if (!selectedChat) {
-        return <div className={styles.chatWindow}></div>;
+        return <div className={styles.chatWindow}>Выберите чат</div>;
     }
 
     const toggleMenu = (idx, event) => {
         event.stopPropagation();
+        console.log('Открытие/закрытие меню сообщений:', idx);
         setOpenMenuIndex(openMenuIndex === idx ? null : idx);
+    };
+
+    const toggleInterviewMenu = (interviewId, event) => {
+        event.stopPropagation();
+        console.log('Клик по собеседованию, interviewId:', interviewId);
+        setOpenInterviewMenu(openInterviewMenu === interviewId ? null : interviewId);
+    };
+
+    const handleDeleteInterview = async (interviewId) => {
+        if (window.confirm('Вы уверены, что хотите удалить это собеседование?')) {
+            try {
+                console.log('Удаление собеседования, interviewId:', interviewId);
+                await axios.delete(`http://localhost:1111/api/interviews/${interviewId}`, {
+                    headers: {
+                        Authorization: `Bearer ${sessionStorage.getItem('token')}`
+                    }
+                });
+                setInterviews(prev => prev.filter(i => i.id !== interviewId));
+                addToast('Собеседование успешно удалено', 'success');
+                setOpenInterviewMenu(null);
+            } catch (error) {
+                console.error('Ошибка удаления собеседования:', error.response?.data || error.message);
+                addToast('Ошибка при удалении собеседования', 'error');
+            }
+        }
     };
 
     const handleEditStart = (msg) => {
@@ -172,17 +203,35 @@ const NotificationChat = ({ selectedChat }) => {
             return interviewDate === dateStr;
         });
 
+        console.log('Rendering interviews for date:', dateStr, 'Interviews:', dayInterviews);
+
         return (
             <div className={styles.interviewTile}>
                 {dayInterviews.map(interview => (
-                    <div key={interview.id} className={styles.interviewItem}>
-                        <span className={styles.interviewPosition}>{interview.position}</span>
-                        <span className={styles.interviewTime}>
-                            {new Date(interview.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        <span className={styles.interviewPerson}>
-                            {userRole === 'CANDIDATE' ? `${interview.hrFirstName} ${interview.hrLastName}` : `${interview.candidateFirstName} ${interview.candidateLastName}`}
-                        </span>
+                    <div
+                        key={interview.id}
+                        className={styles.interviewItem}
+                        onClick={(e) => toggleInterviewMenu(interview.id, e)}
+                        ref={menuRef} // Привязываем ref к .interviewItem
+                    >
+                        {openInterviewMenu === interview.id ? (
+                            <button
+                                className={styles.deleteButton}
+                                onClick={() => handleDeleteInterview(interview.id)}
+                            >
+                                Удалить
+                            </button>
+                        ) : (
+                            <>
+                                <span className={styles.interviewPosition}>{interview.position}</span>
+                                <span className={styles.interviewTime}>
+                                    {new Date(interview.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                <span className={styles.interviewPerson}>
+                                    {userRole === 'Кандидат' ? `${interview.hrFirstName} ${interview.hrLastName}` : `${interview.candidateFirstName} ${interview.candidateLastName}`}
+                                </span>
+                            </>
+                        )}
                     </div>
                 ))}
             </div>

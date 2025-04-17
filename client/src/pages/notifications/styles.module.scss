@@ -162,14 +162,48 @@
     }
   }
 }
+.interviewTile {
+  position: relative;
+  z-index: 800;
+}
+
 .interviewItem {
-  font-size: 10px !important;
-  padding: 2px;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
+  cursor: pointer;
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 60px; /* Минимальная высота для единообразия */
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.deleteButton {
+  width: 100%; /* Кнопка занимает всю ширину .interviewItem */
+  height: 100%; /* Кнопка занимает всю высоту .interviewItem */
+  min-height: 60px; /* Соответствует min-height .interviewItem */
+  background-color: #ff4d4f; /* Красный фон для кнопки удаления */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  &:hover {
+    background-color: #d9363e; /* Темнее при наведении */
+  }
+}
+
+/* Отключаем overflow для календаря */
+.react-calendar,
+.react-calendar__tile {
+  overflow: visible !important;
 }
 
 .interviewPosition,

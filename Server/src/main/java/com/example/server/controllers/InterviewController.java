@@ -6,10 +6,7 @@ import com.example.server.Service.InterviewService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -56,6 +53,26 @@ public class InterviewController {
         } catch (Exception e) {
             logger.error("Error fetching interviews: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body("Ошибка при получении собеседований: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteInterview(
+            @PathVariable("id") Integer interviewId,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.substring(7);
+            String email = jwtUtil.extractUsername(token);
+            String role = jwtUtil.extractClaim(token, claims -> claims.get("role", String.class));
+            if (!jwtUtil.isTokenValid(token, email)) {
+                return ResponseEntity.status(401).body("Недействительный или просроченный токен");
+            }
+            interviewService.deleteInterview(interviewId, email, role);
+            return ResponseEntity.ok("Собеседование успешно удалено");
+        } catch (Exception e) {
+            logger.error("Error deleting interview: {}", e.getMessage(), e);
+            return ResponseEntity.status(400).body("Ошибка при удалении собеседования: " + e.getMessage());
         }
     }
 }
