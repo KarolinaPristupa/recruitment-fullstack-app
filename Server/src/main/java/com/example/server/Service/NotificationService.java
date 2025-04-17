@@ -1,15 +1,9 @@
 package com.example.server.Service;
 
-import com.example.server.Models.Invite;
-import com.example.server.Models.Notification;
-import com.example.server.Models.Response;
-import com.example.server.Models.User;
-import com.example.server.Models.Vacancy;
-import com.example.server.Repository.InviteRepository;
-import com.example.server.Repository.NotificationRepository;
-import com.example.server.Repository.ResponseRepository;
-import com.example.server.Repository.UserRepository;
-import com.example.server.Repository.VacancyRepository;
+import com.example.server.Models.*;
+import com.example.server.Repository.*;
+import com.example.server.Service.observer.NotificationPublisher;
+import com.example.server.Service.observer.Observer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class NotificationService {
+public class NotificationService implements Observer {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
 
@@ -31,28 +25,35 @@ public class NotificationService {
     private final InviteRepository inviteRepository;
     private final ResponseRepository responseRepository;
     private final VacancyRepository vacancyRepository;
+    private final InterviewService interviewService;
+    private final NotificationPublisher notificationPublisher;
 
     public NotificationService(
             NotificationRepository notificationRepository,
             UserRepository userRepository,
             InviteRepository inviteRepository,
             ResponseRepository responseRepository,
-            VacancyRepository vacancyRepository
+            VacancyRepository vacancyRepository,
+            InterviewService interviewService,
+            NotificationPublisher notificationPublisher
     ) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.inviteRepository = inviteRepository;
         this.responseRepository = responseRepository;
         this.vacancyRepository = vacancyRepository;
+        this.interviewService = interviewService;
+        this.notificationPublisher = notificationPublisher;
+        this.notificationPublisher.subscribe(this);
     }
 
     public Notification save(Notification notification) {
-        logger.info("Сохранение уведомления: notificationId={}", notification.getNotificationId());
+        logger.info("Saving notification: notificationId={}", notification.getNotificationId());
         return notificationRepository.save(notification);
     }
 
     public Notification createNotification(String message, String details, User sender, User recipient) {
-        logger.info("Создание уведомления от senderId={} для recipientId={}", sender.getUsersId(), recipient.getUsersId());
+        logger.info("Creating notification from senderId={} for recipientId={}", sender.getUsersId(), recipient.getUsersId());
         Notification notification = new Notification();
         notification.setMessage(message);
         notification.setDetails(details);
@@ -62,17 +63,72 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
+    @Override
+    @Transactional
+    public void update(String eventType, Object entity, User sender, User recipient) {
+        String message = "";
+        String details = "";
+
+        if ("CREATE".equals(eventType)) {
+            return;
+        }
+
+        if (entity instanceof Invite) {
+            Invite invite = (Invite) entity;
+            Vacancy vacancy = invite.getVacancy();
+            LocalDateTime date = invite.getDate();
+
+            switch (eventType) {
+                case "UPDATE":
+                    message = String.format("Приглашение на вакансию %s обновлено", vacancy.getPosition());
+                    details = String.format("Новая дата: %s, Время: %s", date.toLocalDate(), date.toLocalTime().withSecond(0).withNano(0));
+                    break;
+                case "DELETE":
+                    message = String.format("Приглашение на вакансию %s отменено", vacancy.getPosition());
+                    details = "Приглашение удалено";
+                    break;
+            }
+        } else if (entity instanceof Response) {
+            Response response = (Response) entity;
+            Vacancy vacancy = response.getVacancy();
+            Candidate candidate = response.getCandidate();
+
+            switch (eventType) {
+                case "UPDATE":
+                    message = String.format("Отклик кандидата %s %s на вакансию обновлен", sender.getFirstName(), sender.getLastName());
+                    details = String.format("Обновлена вакансия: %s", vacancy.getPosition());
+                    break;
+                case "DELETE":
+                    message = String.format("Отклик кандидата %s %s на вакансию удален", sender.getFirstName(), sender.getLastName());
+                    details = "Отклик удален";
+                    break;
+            }
+        }
+
+        if (!message.isEmpty()) {
+            createNotification(message, details, sender, recipient);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void update(String eventType, Object entity, User sender, User recipient, String message, String details) {
+        if ("CUSTOM".equals(eventType)) {
+            createNotification(message, details, sender, recipient);
+        }
+    }
+
     public List<Notification> getChat(Integer user1, Integer user2) {
-        logger.info("Получение чата между user1={} и user2={}", user1, user2);
+        logger.info("Retrieving chat between user1={} and user2={}", user1, user2);
         List<Notification> notifications = notificationRepository.findChatBetween(user1, user2);
-        logger.info("Найдено {} сообщений", notifications.size());
+        logger.info("Found {} messages", notifications.size());
         return notifications;
     }
 
     public List<User> getChatRecipients(Integer userId) {
-        logger.info("Получение чатов для userId={}", userId);
+        logger.info("Retrieving chat recipients for userId={}", userId);
         List<Notification> notifs = notificationRepository.findBySender_UsersIdOrRecipient_UsersId(userId, userId);
-        logger.info("Найдено {} уведомлений для userId={}", notifs.size(), userId);
+        logger.info("Found {} notifications for userId={}", notifs.size(), userId);
 
         List<User> recipients = notifs.stream()
                 .flatMap(n -> Stream.of(n.getSender(), n.getRecipient()))
@@ -80,87 +136,86 @@ public class NotificationService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        logger.info("Найдено {} уникальных получателей", recipients.size());
+        logger.info("Found {} unique recipients", recipients.size());
         return recipients;
     }
 
     public Optional<Notification> findById(Integer notificationId) {
-        logger.info("Поиск уведомления: notificationId={}", notificationId);
+        logger.info("Finding notification: notificationId={}", notificationId);
         return notificationRepository.findById(notificationId);
     }
 
     public void editNotification(Integer notificationId, Integer userId, String details) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> {
-                    logger.error("Уведомление не найдено: notificationId={}", notificationId);
-                    return new RuntimeException("Уведомление не найдено");
+                    logger.error("Notification not found: notificationId={}", notificationId);
+                    return new RuntimeException("Notification not found");
                 });
 
         if (!notification.getSender().getUsersId().equals(userId)) {
-            logger.warn("Попытка редактирования чужого уведомления: notificationId={}, userId={}", notificationId, userId);
-            throw new RuntimeException("Нет прав для редактирования");
+            logger.warn("Attempt to edit someone else's notification: notificationId={}, userId={}", notificationId, userId);
+            throw new RuntimeException("No permission to edit");
         }
 
         notification.setDetails(details);
         notificationRepository.save(notification);
-        logger.info("Уведомление отредактировано: notificationId={}", notificationId);
+        logger.info("Notification edited: notificationId={}", notificationId);
     }
 
     public void editInviteNotification(Integer notificationId, Integer userId, LocalDateTime date) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> {
-                    logger.error("Уведомление не найдено: notificationId={}", notificationId);
-                    return new RuntimeException("Уведомление не найдено");
+                    logger.error("Notification not found: notificationId={}", notificationId);
+                    return new RuntimeException("Notification not found");
                 });
 
         if (!notification.getSender().getUsersId().equals(userId)) {
-            logger.warn("Попытка редактирования чужого уведомления: notificationId={}, userId={}", notificationId, userId);
-            throw new RuntimeException("Нет прав для редактирования");
+            logger.warn("Attempt to edit someone else's notification: notificationId={}, userId={}", notificationId, userId);
+            throw new RuntimeException("No permission to edit");
         }
 
         Optional<Invite> inviteOpt = inviteRepository.findByNotification_NotificationId(notificationId);
         if (inviteOpt.isEmpty()) {
-            logger.error("Приглашение не найдено для уведомления: notificationId={}", notificationId);
-            throw new RuntimeException("Приглашение не найдено");
+            logger.error("Invite not found for notification: notificationId={}", notificationId);
+            throw new RuntimeException("Invite not found");
         }
 
         Invite invite = inviteOpt.get();
         invite.setDate(date);
         inviteRepository.save(invite);
-        notification.setDetails(date.toString());
-        notificationRepository.save(notification);
-        logger.info("Приглашение отредактировано: notificationId={}, date={}", notificationId, date);
+        notificationPublisher.notifyObservers("UPDATE", invite, notification.getSender(), notification.getRecipient());
+        logger.info("Invite edited: notificationId={}, date={}", notificationId, date);
     }
 
     public void editResponseNotification(Integer notificationId, Integer userId, String vacancyName) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> {
-                    logger.error("Уведомление не найдено: notificationId={}", notificationId);
-                    return new RuntimeException("Уведомление не найдено");
+                    logger.error("Notification not found: notificationId={}", notificationId);
+                    return new RuntimeException("Notification not found");
                 });
 
         if (!notification.getSender().getUsersId().equals(userId)) {
-            logger.warn("Попытка редактирования чужого уведомления: notificationId={}, userId={}", notificationId, userId);
-            throw new RuntimeException("Нет прав для редактирования");
+            logger.warn("Attempt to edit someone else's notification: notificationId={}, userId={}", notificationId, userId);
+            throw new RuntimeException("No permission to edit");
         }
 
-        Response response = notification.getResponseEntity();
-        if (response == null) {
-            logger.error("Отклик не найден для уведомления: notificationId={}", notificationId);
-            throw new RuntimeException("Отклик не найден");
+        Optional<Response> responseOpt = responseRepository.findByNotification_NotificationId(notificationId);
+        if (responseOpt.isEmpty()) {
+            logger.error("Response not found for notification: notificationId={}", notificationId);
+            throw new RuntimeException("Response not found");
         }
 
         Vacancy vacancy = vacancyRepository.findByPosition(vacancyName)
                 .orElseThrow(() -> {
-                    logger.error("Вакансия не найдена: vacancyName={}", vacancyName);
-                    return new RuntimeException("Вакансия не найдена");
+                    logger.error("Vacancy not found: vacancyName={}", vacancyName);
+                    return new RuntimeException("Vacancy not found");
                 });
 
+        Response response = responseOpt.get();
         response.setVacancy(vacancy);
         responseRepository.save(response);
-        notification.setDetails(vacancyName);
-        notificationRepository.save(notification);
-        logger.info("Отклик отредактирован: notificationId={}, vacancyName={}", notificationId, vacancyName);
+        notificationPublisher.notifyObservers("UPDATE", response, notification.getSender(), notification.getRecipient());
+        logger.info("Response edited: notificationId={}, vacancyName={}", notificationId, vacancyName);
     }
 
     public boolean vacancyExists(String vacancyName) {
@@ -170,43 +225,119 @@ public class NotificationService {
     @Transactional
     public void deleteNotification(Integer notificationId, Integer userId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Уведомление не найдено"));
+                .orElseThrow(() -> {
+                    logger.error("Notification not found: notificationId={}", notificationId);
+                    return new RuntimeException("Notification not found");
+                });
 
         if (!notification.getSender().getUsersId().equals(userId)) {
-            throw new RuntimeException("Нет прав для удаления уведомления");
+            logger.warn("Attempt to delete someone else's notification: notificationId={}, userId={}", notificationId, userId);
+            throw new RuntimeException("No permission to delete notification");
         }
 
-        // Удаляем INVITE, если есть
-        inviteRepository.findByNotification_NotificationId(notificationId)
-                .ifPresent(inviteRepository::delete);
+        Optional<Invite> inviteOpt = inviteRepository.findByNotification_NotificationId(notificationId);
+        inviteOpt.ifPresent(invite -> {
+            notificationPublisher.notifyObservers("DELETE", invite, notification.getSender(), notification.getRecipient());
+            inviteRepository.delete(invite);
+        });
 
-        // Удаляем RESPONSE, если есть
-        Response response = notification.getResponseEntity();
-        if (response != null) {
-            // Обнуляем ссылку на notification
-            response.setNotification(null);
-            responseRepository.save(response); // сохранить без связи
-            responseRepository.delete(response); // потом удалить
-        }
+        Optional<Response> responseOpt = responseRepository.findByNotification_NotificationId(notificationId);
+        responseOpt.ifPresent(response -> {
+            notificationPublisher.notifyObservers("DELETE", response, notification.getSender(), notification.getRecipient());
+            responseRepository.delete(response);
+        });
 
-        // Удаляем сам notification
         notificationRepository.delete(notification);
+        logger.info("Notification deleted: notificationId={}", notificationId);
     }
 
-    public void updateNotificationResponse(Integer notificationId, Integer userId, String response) {
+    @Transactional
+    public void updateNotificationResponse(Integer notificationId, Integer userId, String response, LocalDateTime interviewDate) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> {
-                    logger.error("Уведомление не найдено: notificationId={}", notificationId);
-                    return new RuntimeException("Уведомление не найдено");
+                    logger.error("Notification not found: notificationId={}", notificationId);
+                    return new RuntimeException("Notification not found");
                 });
 
         if (!notification.getRecipient().getUsersId().equals(userId)) {
-            logger.warn("Попытка ответа на чужое уведомление: notificationId={}, userId={}", notificationId, userId);
-            throw new RuntimeException("Нет прав для ответа");
+            logger.warn("Attempt to respond to someone else's notification: notificationId={}, userId={}", notificationId, userId);
+            throw new RuntimeException("No permission to respond");
+        }
+
+        if (!response.equals("Согласие") && !response.equals("Отказ")) {
+            logger.error("Invalid response: {}", response);
+            throw new RuntimeException("Invalid response: must be 'Согласие' or 'Отказ'");
         }
 
         notification.setResponse(response);
         notificationRepository.save(notification);
-        logger.info("Ответ обновлен: notificationId={}, response={}", notificationId, response);
+        logger.info("Notification response updated: notificationId={}, response={}", notificationId, response);
+
+        Optional<Invite> inviteOpt = inviteRepository.findByNotification_NotificationId(notificationId);
+        Optional<Response> responseOpt = responseRepository.findByNotification_NotificationId(notificationId);
+
+        if (inviteOpt.isPresent()) {
+            handleInviteResponse(inviteOpt.get(), response, notification);
+        } else if (responseOpt.isPresent()) {
+            handleResponseResponse(responseOpt.get(), response, notification, interviewDate);
+        } else {
+            logger.error("No Invite or Response found for notification: notificationId={}", notificationId);
+            throw new RuntimeException("No associated Invite or Response found");
+        }
+    }
+
+    private void handleInviteResponse(Invite invite, String response, Notification notification) {
+        User sender = notification.getRecipient(); // Employer responding
+        User recipient = notification.getSender(); // Candidate who sent the invite
+        Vacancy vacancy = invite.getVacancy();
+        Candidate candidate = invite.getCandidate();
+        LocalDateTime date = invite.getDate();
+
+        if (response.equals("Согласие")) {
+            // Create Interview
+            interviewService.createInterview(candidate, vacancy, date);
+            // Send new notification
+            String message = String.format("Назначено собеседование на вакансию: %s", vacancy.getPosition());
+            String details = String.format("Дата: %s, Время: %s", date.toLocalDate(), date.toLocalTime().withSecond(0).withNano(0));
+            notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
+            // Delete Invite
+            inviteRepository.delete(invite);
+        } else {
+            // Send rejection notification
+            String message = String.format("Отказ от приглашения на вакансию: %s", vacancy.getPosition());
+            String details = "Кандидат отказался от собеседования";
+            notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
+            // Delete Invite
+            inviteRepository.delete(invite);
+        }
+    }
+
+    private void handleResponseResponse(Response responseEntity, String response, Notification notification, LocalDateTime interviewDate) {
+        User sender = notification.getRecipient(); // Employer responding
+        User recipient = notification.getSender(); // Candidate who sent the response
+        Vacancy vacancy = responseEntity.getVacancy();
+        Candidate candidate = responseEntity.getCandidate();
+
+        if (response.equals("Согласие")) {
+            if (interviewDate == null) {
+                logger.error("Interview date required for Response acceptance: notificationId={}", notification.getNotificationId());
+                throw new RuntimeException("Interview date is required for acceptance");
+            }
+            // Create Interview
+            interviewService.createInterview(candidate, vacancy, interviewDate);
+            // Send new notification
+            String message = String.format("Назначено собеседование на вакансию: %s", vacancy.getPosition());
+            String details = String.format("Дата: %s, Время: %s", interviewDate.toLocalDate(), interviewDate.toLocalTime().withSecond(0).withNano(0));
+            notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
+            // Delete Response
+            responseRepository.delete(responseEntity);
+        } else {
+            // Send rejection notification
+            String message = String.format("Отказ в собеседовании на вакансию: %s", vacancy.getPosition());
+            String details = "Работодатель отказал в собеседовании";
+            notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
+            // Delete Response
+            responseRepository.delete(responseEntity);
+        }
     }
 }

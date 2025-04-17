@@ -95,11 +95,14 @@ public class NotificationsController {
                 if (invite.isPresent()) {
                     map.put("date", invite.get().getDate().toString());
                     map.put("type", "invite");
-                } else if (n.getResponseEntity() != null) {
-                    map.put("vacancyName", n.getResponseEntity().getVacancy() != null ? n.getResponseEntity().getVacancy().getPosition() : null);
-                    map.put("type", "response");
                 } else {
-                    map.put("type", "message");
+                    Optional<com.example.server.Models.Response> responseOpt = responseService.findByNotificationId(n.getNotificationId());
+                    if (responseOpt.isPresent()) {
+                        map.put("vacancyName", responseOpt.get().getVacancy().getPosition());
+                        map.put("type", "response");
+                    } else {
+                        map.put("type", "message");
+                    }
                 }
                 return map;
             }).collect(Collectors.toList());
@@ -243,7 +246,28 @@ public class NotificationsController {
                     });
 
             String response = data.get("response");
-            notificationService.updateNotificationResponse(notificationId, user.getUsersId(), response);
+            String interviewDateStr = data.get("interviewDate");
+            LocalDateTime interviewDate = null;
+
+            if (response == null) {
+                logger.warn("Ответ не указан: notificationId={}", notificationId);
+                return ResponseEntity.status(400).body(Map.of("success", false, "error", "Ответ обязателен"));
+            }
+
+            if (interviewDateStr != null) {
+                try {
+                    interviewDate = LocalDateTime.parse(interviewDateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                    if (interviewDate.isBefore(LocalDateTime.now())) {
+                        logger.warn("Дата собеседования в прошлом: date={}", interviewDateStr);
+                        return ResponseEntity.status(400).body(Map.of("success", false, "error", "Дата собеседования не может быть в прошлом"));
+                    }
+                } catch (DateTimeParseException e) {
+                    logger.warn("Некорректный формат даты: date={}", interviewDateStr);
+                    return ResponseEntity.status(400).body(Map.of("success", false, "error", "Некорректный формат даты"));
+                }
+            }
+
+            notificationService.updateNotificationResponse(notificationId, user.getUsersId(), response, interviewDate);
 
             logger.info("Ответ успешно обновлен: notificationId={}, response={}", notificationId, response);
             return ResponseEntity.ok(Map.of("success", true));

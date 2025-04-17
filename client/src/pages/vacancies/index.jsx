@@ -57,7 +57,7 @@ const Vacancies = () => {
             const query = searchQuery.toLowerCase();
             filtered = filtered.filter(v => {
                 return (
-                    v.position_title?.toLowerCase().includes(query) ||
+                    v.position?.toLowerCase().includes(query) ||
                     v.requirements?.toLowerCase().includes(query) ||
                     v.description?.toLowerCase().includes(query) ||
                     v.department?.toLowerCase().includes(query) ||
@@ -135,7 +135,7 @@ const Vacancies = () => {
                         onClick={() => handleOpenModal(vacancy)}
                     >
                         <div className={styles["card-header"]}>
-                            <h2>{vacancy.position_title}</h2>
+                            <h2>{vacancy.position}</h2>
                             {currentUser?.role === "Candidate" && (
                                 <div
                                     className={styles["heart-icon"]}
@@ -167,8 +167,8 @@ const Vacancies = () => {
                     onDelete={(id) => {
                         setVacancies(prev => prev.filter(v => v.vacancies_id !== id));
                     }}
-                    toast={toast}   // Pass the toast state here
-                    setToast={setToast} // Pass the setToast function for updating the toast
+                    toast={toast}
+                    setToast={setToast}
                 />
 
             )}
