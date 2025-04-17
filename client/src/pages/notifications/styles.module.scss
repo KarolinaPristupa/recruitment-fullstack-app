@@ -106,6 +106,134 @@
   gap: 12px;
 }
 
+.interviewCalendar {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px;
+  background: linear-gradient(to bottom, rgba($first-accent-color, 0.95), rgba($second-accent-color, 0.1));
+}
+
+.customCalendar {
+  min-width: 96%;
+  min-height: 95%;
+  padding: 20px;
+
+  .react-calendar {
+    &__navigation {
+      margin-bottom: 20px;
+      flex-direction: row;
+
+      button {
+        font-size: 24px;
+        padding: 10px 15px;
+      }
+    }
+
+    &__month-view {
+      &__weekdays {
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      &__days {
+        gap: 9px;
+        grid-template-rows: repeat(7, minmax(100px, 1fr));
+
+        &__day {
+          min-width: 90px;
+          min-height: 90px;
+          padding: 10px;
+          font-size: 16px;
+          position: relative;
+
+
+          .interviewTile {
+            width: 100%;
+            height: 100%;
+            //overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+        }
+      }
+    }
+  }
+}
+.interviewItem {
+  font-size: 10px !important;
+  padding: 2px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.interviewPosition,
+.interviewTime,
+.interviewPerson {
+  font-size: 8px !important;
+  line-height: 1.2;
+}
+
+.react-calendar__viewContainer {
+  overflow: visible;
+}
+
+.react-calendar__month-view__days {
+  grid-auto-flow: row dense;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.interviewTile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 5px;
+  font-size: 16px;
+  color: $text-color;
+  width: 100%;
+  text-align: center;
+}
+
+.interviewItem {
+  background: $second-accent-color;
+  border-radius: 10px;
+  padding: 8px; // Reduced padding to fit
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 14px; // Adjusted for smaller text
+  line-height: 1.3; // Improve text stacking
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.interviewPosition {
+  font-weight: bold;
+  color: #333;
+  display: block;
+  font-size: 16px;
+}
+
+.interviewTime {
+  font-size: 14px; // Adjusted for fit
+  color: #555;
+  display: block;
+}
+
+.interviewPerson {
+  font-style: italic;
+  color: #777;
+  display: block;
+  font-size: 14px; // Adjusted for fit
+}
+
 .message {
   position: relative;
   max-width: 70%;
@@ -151,7 +279,7 @@
 }
 
 .textInput {
-  width: 94%;
+  width: 100%;
   margin-bottom: 8px;
   padding: 8px 12px;
   border-radius: 8px;
@@ -177,7 +305,7 @@
 }
 
 .calendarInput {
-  width: 94%;
+  width: 100%;
   margin-bottom: 8px;
   padding: 8px 12px;
   border-radius: 8px;
