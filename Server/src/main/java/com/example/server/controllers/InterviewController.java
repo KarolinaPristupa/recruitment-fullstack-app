@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -28,7 +29,6 @@ public class InterviewController {
         try {
             logger.info("Received request to fetch interviews");
 
-            // Validate and extract token
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 logger.warn("Token is missing or invalid format: {}", authHeader);
                 return ResponseEntity.status(401).body("Токен отсутствует или неверный формат");
@@ -45,7 +45,6 @@ public class InterviewController {
                 return ResponseEntity.status(401).body("Недействительный или просроченный токен");
             }
 
-            // Fetch interviews
             List<Interview> interviews = interviewService.getInterviewsForUser(email);
             logger.info("Successfully fetched {} interviews for user: {}", interviews.size(), email);
             return ResponseEntity.ok(interviews);
@@ -73,6 +72,57 @@ public class InterviewController {
         } catch (Exception e) {
             logger.error("Error deleting interview: {}", e.getMessage(), e);
             return ResponseEntity.status(400).body("Ошибка при удалении собеседования: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateInterview(
+            @PathVariable("id") Integer interviewId,
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody UpdateInterviewRequest request
+    ) {
+        try {
+            String token = authHeader.substring(7);
+            String email = jwtUtil.extractUsername(token);
+            String role = jwtUtil.extractClaim(token, claims -> claims.get("role", String.class));
+            if (!jwtUtil.isTokenValid(token, email)) {
+                return ResponseEntity.status(401).body("Недействительный или просроченный токен");
+            }
+            if (request.getDate() == null && (request.getPosition() == null || request.getPosition().trim().isEmpty())) {
+                return ResponseEntity.status(400).body("Не указаны дата или позиция для обновления");
+            }
+            Interview updatedInterview = interviewService.updateInterview(
+                    interviewId,
+                    email,
+                    role,
+                    request.getDate(),
+                    request.getPosition()
+            );
+            return ResponseEntity.ok(updatedInterview);
+        } catch (Exception e) {
+            logger.error("Error updating interview: {}", e.getMessage(), e);
+            return ResponseEntity.status(400).body("Ошибка при обновлении собеседования: " + e.getMessage());
+        }
+    }
+
+    public static class UpdateInterviewRequest {
+        private LocalDateTime date;
+        private String position;
+
+        public LocalDateTime getDate() {
+            return date;
+        }
+
+        public void setDate(LocalDateTime date) {
+            this.date = date;
+        }
+
+        public String getPosition() {
+            return position;
+        }
+
+        public void setPosition(String position) {
+            this.position = position;
         }
     }
 }

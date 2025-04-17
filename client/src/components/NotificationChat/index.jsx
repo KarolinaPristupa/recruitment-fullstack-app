@@ -19,6 +19,7 @@ const NotificationChat = ({ selectedChat }) => {
     const [interviews, setInterviews] = useState([]);
     const [userRole, setUserRole] = useState(null);
     const [openInterviewMenu, setOpenInterviewMenu] = useState(null);
+    const [editingInterview, setEditingInterview] = useState(null); // Для редактирования
     const menuRef = useRef(null);
 
     const addToast = (message, type) => {
@@ -68,9 +69,10 @@ const NotificationChat = ({ selectedChat }) => {
                 console.log('Закрытие меню: клик вне меню');
                 setOpenMenuIndex(null);
                 setOpenInterviewMenu(null);
+                setEditingInterview(null);
             }
         };
-        document.addEventListener('click', handleClickOutside); // Используем click вместо mousedown
+        document.addEventListener('click', handleClickOutside);
         return () => {
             document.removeEventListener('click', handleClickOutside);
         };
@@ -109,6 +111,53 @@ const NotificationChat = ({ selectedChat }) => {
                 addToast('Ошибка при удалении собеседования', 'error');
             }
         }
+    };
+
+    const handleEditInterviewStart = (interview, event) => {
+        event.stopPropagation();
+        setEditingInterview({
+            id: interview.id,
+            date: new Date(interview.date).toISOString().slice(0, 16),
+            position: interview.position
+        });
+        setOpenInterviewMenu(null);
+    };
+
+    const handleEditInterviewSave = async (interviewId) => {
+        if (!editingInterview.date) {
+            addToast('Укажите дату и время', 'error');
+            return;
+        }
+        if (!editingInterview.position) {
+            addToast('Укажите позицию', 'error');
+            return;
+        }
+        try {
+            console.log('Сохранение изменений собеседования, interviewId:', interviewId);
+            const response = await axios.put(`http://localhost:1111/api/interviews/${interviewId}`, {
+                date: new Date(editingInterview.date).toISOString(),
+                position: editingInterview.position
+            }, {
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem('token')}`
+                }
+            });
+            console.log('Ответ сервера:', response.data);
+            setInterviews(prev => prev.map(i =>
+                i.id === interviewId
+                    ? { ...i, date: new Date(editingInterview.date), position: editingInterview.position }
+                    : i
+            ));
+            addToast('Собеседование успешно обновлено', 'success');
+            setEditingInterview(null);
+        } catch (error) {
+            console.error('Ошибка обновления собеседования:', error.response?.data || error.message);
+            addToast(`Ошибка при обновлении собеседования: ${error.response?.data || error.message}`, 'error');
+        }
+    };
+
+    const handleEditInterviewCancel = () => {
+        setEditingInterview(null);
     };
 
     const handleEditStart = (msg) => {
@@ -212,15 +261,44 @@ const NotificationChat = ({ selectedChat }) => {
                         key={interview.id}
                         className={styles.interviewItem}
                         onClick={(e) => toggleInterviewMenu(interview.id, e)}
-                        ref={menuRef} // Привязываем ref к .interviewItem
+                        ref={menuRef}
                     >
-                        {openInterviewMenu === interview.id ? (
-                            <button
-                                className={styles.deleteButton}
-                                onClick={() => handleDeleteInterview(interview.id)}
-                            >
-                                Удалить
-                            </button>
+                        {editingInterview && editingInterview.id === interview.id ? (
+                            <div className={styles.editForm}>
+                                <input
+                                    type="datetime-local"
+                                    className={styles.editInput}
+                                    value={editingInterview.date}
+                                    onChange={(e) => setEditingInterview({ ...editingInterview, date: e.target.value })}
+                                    min={new Date().toISOString().slice(0, 16)}
+                                />
+                                <input
+                                    type="text"
+                                    className={styles.editInput}
+                                    value={editingInterview.position}
+                                    onChange={(e) => setEditingInterview({ ...editingInterview, position: e.target.value })}
+                                    placeholder="Позиция"
+                                />
+                                <div className={styles.editActions}>
+                                    <button onClick={() => handleEditInterviewSave(interview.id)}>Сохранить</button>
+                                    <button onClick={handleEditInterviewCancel}>Отмена</button>
+                                </div>
+                            </div>
+                        ) : openInterviewMenu === interview.id ? (
+                            <div className={styles.menuButtons}>
+                                <button
+                                    className={styles.editButton}
+                                    onClick={(e) => handleEditInterviewStart(interview, e)}
+                                >
+                                    Обновить
+                                </button>
+                                <button
+                                    className={styles.deleteButton}
+                                    onClick={() => handleDeleteInterview(interview.id)}
+                                >
+                                    Удалить
+                                </button>
+                            </div>
                         ) : (
                             <>
                                 <span className={styles.interviewPosition}>{interview.position}</span>
