@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import PersonalDataForm from '@components/PersonalDataForm';
-import ResumeForm from '@components/ResumeForm';
-import ResumePreview from '@components/ResumePreview';
+import PersonalDataForm from '@components/personal-data-form';
+import ResumeForm from '@components/resume-form';
+import ResumePreview from '@components/resum-preview';
 
 import styles from "./styles.module.scss";
 

@@ -27,6 +27,10 @@ public class Invite {
     @JoinColumn(name = "vacancies_id")
     private Vacancy vacancy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "candidate_id")
+    private Candidate candidate;
+
     @Column(name = "date")
     private LocalDateTime date;
 }

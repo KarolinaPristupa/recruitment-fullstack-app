@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import LoginForm from "@components/LoginForm";
-import RegistrationForm from "@components/RegistrationForm";
-import ForgotPasswordForm from "@components/ForgotPasswordForm";
+import LoginForm from "@components/login-form";
+import RegistrationForm from "@components/registration-form";
+import ForgotPasswordForm from "@components/forgot-password-form";
 import { useNavigate } from "react-router-dom";
 
 const Account = () => {

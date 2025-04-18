@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { FaTimes } from "react-icons/fa";
-import ResumePreview from "@components/ResumePreview";
-import Toast from "@components/Toast";
+import ResumePreview from "@components/resum-preview";
+import Toast from "@components/toast";
 import styles from "./styles.module.scss";
 import "react-calendar/dist/Calendar.css";
-import Modal_invite from "@components/Modal_invite";
+import ModalInvite from "@components/modal-invite";
 
 const Modal_candidate = ({ candidate, onClose }) => {
     const [toast, setToast] = useState({ show: false, message: "", type: "" });
@@ -40,7 +40,7 @@ const Modal_candidate = ({ candidate, onClose }) => {
                 </button>
 
                 {showInviteModal && (
-                    <Modal_invite
+                    <ModalInvite
                         candidate={candidateToInvite}
                         vacancy={vacancyToInvite}
                         onClose={() => setShowInviteModal(false)}

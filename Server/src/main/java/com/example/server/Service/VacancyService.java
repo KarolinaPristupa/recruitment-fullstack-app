@@ -6,6 +6,8 @@ import com.example.server.Repository.EmployeeRepository;
 import com.example.server.Repository.UserRepository;
 import com.example.server.Repository.VacancyRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,7 @@ import java.util.List;
 @Service
 public class VacancyService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ResponseService.class);
     @Autowired
     private VacancyRepository vacancyRepository;
 
@@ -90,6 +93,14 @@ public class VacancyService {
     public Vacancy findById(Integer id) {
         return vacancyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Вакансия не найдена"));
+    }
+
+    public Vacancy findByPosition(String position){
+        return vacancyRepository.findByPosition(position)
+                .orElseThrow(() -> {
+            logger.error("Vacancy not found: vacancyName={}", position);
+            return new RuntimeException("Vacancy not found");
+        });
     }
 }
 

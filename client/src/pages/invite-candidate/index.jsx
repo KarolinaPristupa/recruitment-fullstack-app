@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import styles from "@pages/candidates/styles.module.scss";
-import Modal_candidate from "@components/Modal_candidate";
+import Modal_candidate from "@components/modal-candidate";
 import "react-calendar/dist/Calendar.css";
 
 const InviteCandidate = () => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "@pages/candidate/styles.module.scss";
-import Toast from "@components/Toast/index.jsx";
+import Toast from "@components/toast/index.jsx";
 
 const PersonalDataForm = ({ user, onUpdate, refreshCandidate }) => {
     const [photoPreview, setPhotoPreview] = useState(user?.photo || "/default-avatar.png");

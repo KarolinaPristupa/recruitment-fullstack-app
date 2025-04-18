@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "@pages/candidate/styles.module.scss";
-import Toast from "@components/Toast";
+import Toast from "@components/toast";
 
 const ResumeForm = ({ resume, onUpdate }) => {
     const [formData, setFormData] = useState({

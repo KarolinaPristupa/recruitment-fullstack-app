@@ -31,8 +31,4 @@ public class Notification {
 
     @Column(name = "response")
     private String response;
-
-    @OneToOne(mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Response responseEntity;
-
 }

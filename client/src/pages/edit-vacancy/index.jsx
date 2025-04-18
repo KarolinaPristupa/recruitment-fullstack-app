@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "@pages/createVacancy/styles.module.scss";
-import Toast from "@components/Toast";
+import styles from "@pages/create-vacancy/styles.module.scss";
+import Toast from "@components/toast";
 import axios from "axios";
 
 const VacancyEdit = () => {

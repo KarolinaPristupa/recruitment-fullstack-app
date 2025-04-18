@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import styles from "./styles.module.scss";
-import Modal_employee from "@components/Modal_vacancy";
+import Modal_employee from "@components/modal-employee";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import Toast from "@components/Toast/index.jsx";
+import Toast from "@components/toast/index.jsx";
 const Vacancies = () => {
     const [vacancies, setVacancies] = useState([]);
     const [filteredVacancies, setFilteredVacancies] = useState([]);
