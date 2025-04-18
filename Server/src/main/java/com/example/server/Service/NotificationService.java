@@ -287,34 +287,29 @@ public class NotificationService implements Observer {
     }
 
     private void handleInviteResponse(Invite invite, String response, Notification notification) {
-        User sender = notification.getRecipient(); // Employer responding
-        User recipient = notification.getSender(); // Candidate who sent the invite
+        User sender = notification.getRecipient();
+        User recipient = notification.getSender();
         Vacancy vacancy = invite.getVacancy();
         Candidate candidate = invite.getCandidate();
         LocalDateTime date = invite.getDate();
 
         if (response.equals("Согласие")) {
-            // Create Interview
             interviewService.createInterview(candidate, vacancy, date);
-            // Send new notification
             String message = String.format("Назначено собеседование на вакансию: %s", vacancy.getPosition());
             String details = String.format("Дата: %s, Время: %s", date.toLocalDate(), date.toLocalTime().withSecond(0).withNano(0));
             notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
-            // Delete Invite
             inviteRepository.delete(invite);
         } else {
-            // Send rejection notification
             String message = String.format("Отказ от приглашения на вакансию: %s", vacancy.getPosition());
             String details = "Кандидат отказался от собеседования";
             notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
-            // Delete Invite
             inviteRepository.delete(invite);
         }
     }
 
     private void handleResponseResponse(Response responseEntity, String response, Notification notification, LocalDateTime interviewDate) {
-        User sender = notification.getRecipient(); // Employer responding
-        User recipient = notification.getSender(); // Candidate who sent the response
+        User sender = notification.getRecipient();
+        User recipient = notification.getSender();
         Vacancy vacancy = responseEntity.getVacancy();
         Candidate candidate = responseEntity.getCandidate();
 
@@ -323,20 +318,16 @@ public class NotificationService implements Observer {
                 logger.error("Interview date required for Response acceptance: notificationId={}", notification.getNotificationId());
                 throw new RuntimeException("Interview date is required for acceptance");
             }
-            // Create Interview
             interviewService.createInterview(candidate, vacancy, interviewDate);
-            // Send new notification
             String message = String.format("Назначено собеседование на вакансию: %s", vacancy.getPosition());
             String details = String.format("Дата: %s, Время: %s", interviewDate.toLocalDate(), interviewDate.toLocalTime().withSecond(0).withNano(0));
             notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
             // Delete Response
             responseRepository.delete(responseEntity);
         } else {
-            // Send rejection notification
             String message = String.format("Отказ в собеседовании на вакансию: %s", vacancy.getPosition());
             String details = "Работодатель отказал в собеседовании";
             notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
-            // Delete Response
             responseRepository.delete(responseEntity);
         }
     }

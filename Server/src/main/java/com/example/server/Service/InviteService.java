@@ -34,13 +34,12 @@ public class InviteService {
         Candidate candidate = candidateRepository.findByUser(recipient)
                 .orElseThrow(() -> new RuntimeException("Candidate not found for user: " + recipient.getUsersId()));
 
-        // Create notification explicitly
         String message = String.format("Вы приглашены на собеседование для вакансии: %s", vacancy.getPosition());
         String details = String.format("Дата: %s, Время: %s", date.toLocalDate(), date.toLocalTime().withSecond(0).withNano(0));
         Notification notification = notificationService.createNotification(message, details, sender, recipient);
 
         Invite invite = new Invite();
-        invite.setNotification(notification); // Set notification before saving
+        invite.setNotification(notification);
         invite.setVacancy(vacancy);
         invite.setCandidate(candidate);
         invite.setDate(date);

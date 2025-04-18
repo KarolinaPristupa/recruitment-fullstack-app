@@ -18,6 +18,6 @@ public class Employee {
 
     @OneToOne
     @JoinColumn(name = "users_id", referencedColumnName = "users_id")
-    @JsonIgnoreProperties("employee") // Игнорируем поле "employee" в User, чтобы избежать рекурсии
+    @JsonIgnoreProperties("employee")
     private User user;
 }

@@ -67,7 +67,7 @@ const useNotifications = (selectedChat) => {
                     }
                 }
             );
-            await fetchMessages(); // Re-fetch messages to reflect server state
+            await fetchMessages();
             return { success: true, message: `Ответ "${response}" успешно отправлен` };
         } catch (error) {
             console.error('Ошибка обновления ответа:', error.response?.data || error.message);
@@ -91,7 +91,7 @@ const useNotifications = (selectedChat) => {
                     }
                 }
             );
-            await fetchMessages(); // Re-fetch messages to reflect server state
+            await fetchMessages();
             return { success: true, message: 'Сообщение успешно отредактировано' };
         } catch (error) {
             console.error('Ошибка редактирования сообщения:', error.response?.data || error.message);

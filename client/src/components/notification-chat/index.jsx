@@ -1,15 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import useNotifications from '@hooks/useNotifications';
 import styles from '@pages/notifications/styles.module.scss';
-<<<<<<< HEAD:client/src/components/notification-chat/index.jsx
 import Toast from '@components/toast';
-=======
-import Toast from '@components/Toast';
 import Calendar from 'react-calendar';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import 'react-calendar/dist/Calendar.css';
->>>>>>> feature/interviews-crud:client/src/components/NotificationChat/index.jsx
 
 const NotificationChat = ({ selectedChat }) => {
     const { messages, updateMessageResponse, editMessage, deleteMessage } = useNotifications(
@@ -23,7 +19,7 @@ const NotificationChat = ({ selectedChat }) => {
     const [interviews, setInterviews] = useState([]);
     const [userRole, setUserRole] = useState(null);
     const [openInterviewMenu, setOpenInterviewMenu] = useState(null);
-    const [editingInterview, setEditingInterview] = useState(null); // Для редактирования
+    const [editingInterview, setEditingInterview] = useState(null);
     const menuRef = useRef(null);
 
     const addToast = (message, type) => {
