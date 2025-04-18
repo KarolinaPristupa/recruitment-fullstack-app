@@ -322,7 +322,6 @@ public class NotificationService implements Observer {
             String message = String.format("Назначено собеседование на вакансию: %s", vacancy.getPosition());
             String details = String.format("Дата: %s, Время: %s", interviewDate.toLocalDate(), interviewDate.toLocalTime().withSecond(0).withNano(0));
             notificationPublisher.notifyObservers("CUSTOM", new Object(), sender, recipient, message, details);
-            // Delete Response
             responseRepository.delete(responseEntity);
         } else {
             String message = String.format("Отказ в собеседовании на вакансию: %s", vacancy.getPosition());
