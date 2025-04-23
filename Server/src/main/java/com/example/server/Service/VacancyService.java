@@ -61,24 +61,18 @@ public class VacancyService {
     }
 
     public void updateVacancyWithEmployeeEmail(String email, Vacancy vacancy) {
-        // Получаем пользователя по email
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Пользователь с таким email не найден"));
-
-        // Получаем сотрудника по пользователю
         Employee employee = employeeRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Сотрудник не найден для этого пользователя"));
 
-        // Находим вакансию по id
         Vacancy existingVacancy = vacancyRepository.findById(vacancy.getVacancies_id())
                 .orElseThrow(() -> new RuntimeException("Вакансия с таким id не найдена"));
 
-        // Проверяем, что вакансия принадлежит тому же сотруднику
         if (!existingVacancy.getEmployee().equals(employee)) {
             throw new RuntimeException("Этот пользователь не является владельцем вакансии");
         }
 
-        // Обновляем поля вакансии
         existingVacancy.setPosition(vacancy.getPosition());
         existingVacancy.setDepartment(vacancy.getDepartment());
         existingVacancy.setRequirements(vacancy.getRequirements());
@@ -86,7 +80,6 @@ public class VacancyService {
         existingVacancy.setStatus(vacancy.getStatus());
         existingVacancy.setSalary(vacancy.getSalary());
 
-        // Сохраняем обновленную вакансию
         vacancyRepository.save(existingVacancy);
     }
 

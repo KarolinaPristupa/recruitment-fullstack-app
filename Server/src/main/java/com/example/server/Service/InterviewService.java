@@ -42,7 +42,7 @@ public class InterviewService {
         logger.info("Fetching interviews for user: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        if ("CANDIDATE".equals(user.getRole())) {
+        if ("Кандидат".equals(user.getRole())) {
             return interviewRepository.findByUserEmail(email);
         } else if ("HR".equals(user.getRole())) {
             return interviewRepository.findByUserEmail(email);

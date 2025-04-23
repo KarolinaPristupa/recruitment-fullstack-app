@@ -40,6 +40,10 @@ const CreateVacancy = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        if (name === "salary" && value < 0) {
+            setToast({ show: true, message: "Зарплата не может быть отрицательной", type: "error" });
+            return;
+        }
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -133,6 +137,7 @@ const CreateVacancy = () => {
                         placeholder="Зарплата (USD)"
                         value={formData.salary}
                         onChange={handleChange}
+                        min="0"
                         required
                     />
 

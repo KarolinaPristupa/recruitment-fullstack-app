@@ -58,7 +58,7 @@ class InterviewServiceTest {
     void getInterviewsForUser_returnsInterviewsForCandidate() {
         User user = new User();
         user.setEmail("candidate@mail.com");
-        user.setRole("CANDIDATE");
+        user.setRole("Кандидат");
 
         List<Interview> interviews = List.of(new Interview());
         when(userRepository.findByEmail("candidate@mail.com")).thenReturn(Optional.of(user));

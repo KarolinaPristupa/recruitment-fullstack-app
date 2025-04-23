@@ -1,0 +1,261 @@
+@use '@/variables' as *;
+
+.interviewCalendar {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px;
+  background: linear-gradient(to bottom, rgba($first-accent-color, 0.95), rgba($second-accent-color, 0.1));
+  overflow-y: auto; /* Enable vertical scrolling */
+  min-height: 100%; /* Ensure it takes full height */
+}
+
+.customCalendar {
+  min-width: 96%;
+  padding: 20px;
+  max-height: 100%; /* Prevent overflow beyond container */
+  overflow: visible; /* Allow tiles to be fully visible */
+
+  .react-calendar {
+    width: 100%;
+    border-radius: 10%;
+    height: auto;
+    background: transparent; /* Ensure background doesn't clip content */
+
+    &__navigation {
+      margin-bottom: 20px;
+      flex-direction: row;
+    }
+
+    &__month-view {
+      &__weekdays {
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      &__days {
+        gap: 9px;
+        grid-template-rows: repeat(7, minmax(100px, auto)); /* Allow rows to grow */
+        grid-auto-rows: minmax(100px, auto); /* Ensure new rows grow */
+        display: grid; /* Ensure proper grid layout */
+        grid-template-columns: repeat(7, 1fr);
+
+        &__day {
+          min-width: 90px;
+          padding: 10px;
+          position: relative;
+          height: auto; /* Allow dynamic height */
+          min-height: 90px;
+        }
+      }
+    }
+  }
+}
+
+:global {
+  .react-calendar {
+    background-color: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 15px;
+    font-family: $font-family;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    padding: 1rem;
+    margin: 1rem auto;
+    color: $second-accent-color !important;
+
+    .react-calendar__tile--active,
+    .react-calendar__tile--hasActive:enabled {
+      background-color: $second-accent-color !important;
+      color: white !important;
+      border-radius: 10px;
+    }
+
+    .react-calendar__tile--now {
+      background-color: $first-accent-color;
+      border: 1px solid $first-accent-color;
+      font-weight: bold;
+      border-radius: 10px;
+    }
+  }
+
+  .react-calendar__navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0rem;
+
+    button {
+      font-weight: bold;
+      font-size: 1rem;
+      color: $second-accent-color;
+    }
+  }
+
+  .react-calendar__month-view__weekdays {
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.6rem;
+    color: $second-accent-color !important;
+    margin-bottom: 0.1rem;
+  }
+}
+
+.interviewTile {
+  position: relative;
+  z-index: 800;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 5px;
+  font-size: 16px;
+  color: $text-color;
+  width: 100%;
+  text-align: center;
+}
+
+.interviewItem {
+  cursor: pointer;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 60px;
+  background: $second-accent-color;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background-color: #f5f5f5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  &[data-disabled="true"] {
+    cursor: default;
+    &:hover {
+      background-color: $second-accent-color;
+      transform: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+.menuButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  height: 100%;
+  min-height: 60px;
+}
+
+.editButton, .deleteButton, .reportButton {
+  width: 100%;
+  height: 33.33%;
+  min-height: 30px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  color: $text-color;
+
+  &:hover {
+    color: $second-accent-color;
+    background: $first-accent-color;
+  }
+}
+
+.reportButton {
+  height: 100%; /* Full height when only report button is shown */
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 500px;
+  height: 150px;
+  min-height: 60px;
+  padding: 5px;
+}
+
+.editInput {
+  width: 12.5%;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.editActions {
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
+
+  button {
+    max-width: 12.5%;
+    flex: 1;
+    padding: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px !important;
+  }
+}
+
+.resultText {
+  font-size: 12px;
+  font-style: italic;
+  color: #555;
+  display: block;
+  margin-top: 4px;
+}
+
+.react-calendar,
+.react-calendar__tile {
+  overflow: visible !important;
+}
+
+.interviewPosition,
+.interviewTime,
+.interviewPerson {
+  font-size: 8px !important;
+  line-height: 1.2;
+}
+
+.react-calendar__viewContainer {
+  overflow: visible;
+}
+
+.react-calendar__month-view__days {
+  grid-auto-flow: row dense;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.interviewPosition {
+  font-weight: bold;
+  color: #333;
+  display: block;
+  font-size: 16px;
+}
+
+.interviewTime {
+  font-size: 14px;
+  color: #555;
+  display: block;
+}
+
+.interviewPerson {
+  font-style: italic;
+  color: #777;
+  display: block;
+  font-size: 14px;
+}

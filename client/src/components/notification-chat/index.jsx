@@ -2,10 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import useNotifications from '@hooks/useNotifications';
 import styles from '@pages/notifications/styles.module.scss';
 import Toast from '@components/toast';
-import Calendar from 'react-calendar';
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import 'react-calendar/dist/Calendar.css';
+import { jwtDecode } from "jwt-decode";
+import InterviewCalendar from '@components/interview-calendar';
 
 const NotificationChat = ({ selectedChat }) => {
     const { messages, updateMessageResponse, editMessage, deleteMessage } = useNotifications(
@@ -16,10 +14,7 @@ const NotificationChat = ({ selectedChat }) => {
     const [showCalendar, setShowCalendar] = useState(null);
     const [interviewDate, setInterviewDate] = useState('');
     const [toasts, setToasts] = useState([]);
-    const [interviews, setInterviews] = useState([]);
     const [userRole, setUserRole] = useState(null);
-    const [openInterviewMenu, setOpenInterviewMenu] = useState(null);
-    const [editingInterview, setEditingInterview] = useState(null);
     const menuRef = useRef(null);
 
     const addToast = (message, type) => {
@@ -45,31 +40,9 @@ const NotificationChat = ({ selectedChat }) => {
     }, []);
 
     useEffect(() => {
-        if (selectedChat && selectedChat.recipientId === 'interviews') {
-            const fetchInterviews = async () => {
-                try {
-                    const res = await axios.get('http://localhost:1111/api/interviews', {
-                        headers: {
-                            Authorization: `Bearer ${sessionStorage.getItem('token')}`
-                        }
-                    });
-                    setInterviews(res.data);
-                } catch (error) {
-                    console.error('Ошибка загрузки собеседований:', error.response?.data || error.message);
-                    addToast('Не удалось загрузить собеседования', 'error');
-                }
-            };
-            fetchInterviews();
-        }
-    }, [selectedChat]);
-
-    useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
-                console.log('Закрытие меню: клик вне меню');
                 setOpenMenuIndex(null);
-                setOpenInterviewMenu(null);
-                setEditingInterview(null);
             }
         };
         document.addEventListener('click', handleClickOutside);
@@ -84,80 +57,7 @@ const NotificationChat = ({ selectedChat }) => {
 
     const toggleMenu = (idx, event) => {
         event.stopPropagation();
-        console.log('Открытие/закрытие меню сообщений:', idx);
         setOpenMenuIndex(openMenuIndex === idx ? null : idx);
-    };
-
-    const toggleInterviewMenu = (interviewId, event) => {
-        event.stopPropagation();
-        console.log('Клик по собеседованию, interviewId:', interviewId);
-        setOpenInterviewMenu(openInterviewMenu === interviewId ? null : interviewId);
-    };
-
-    const handleDeleteInterview = async (interviewId) => {
-        if (window.confirm('Вы уверены, что хотите удалить это собеседование?')) {
-            try {
-                console.log('Удаление собеседования, interviewId:', interviewId);
-                await axios.delete(`http://localhost:1111/api/interviews/${interviewId}`, {
-                    headers: {
-                        Authorization: `Bearer ${sessionStorage.getItem('token')}`
-                    }
-                });
-                setInterviews(prev => prev.filter(i => i.id !== interviewId));
-                addToast('Собеседование успешно удалено', 'success');
-                setOpenInterviewMenu(null);
-            } catch (error) {
-                console.error('Ошибка удаления собеседования:', error.response?.data || error.message);
-                addToast('Ошибка при удалении собеседования', 'error');
-            }
-        }
-    };
-
-    const handleEditInterviewStart = (interview, event) => {
-        event.stopPropagation();
-        setEditingInterview({
-            id: interview.id,
-            date: new Date(interview.date).toISOString().slice(0, 16),
-            position: interview.position
-        });
-        setOpenInterviewMenu(null);
-    };
-
-    const handleEditInterviewSave = async (interviewId) => {
-        if (!editingInterview.date) {
-            addToast('Укажите дату и время', 'error');
-            return;
-        }
-        if (!editingInterview.position) {
-            addToast('Укажите позицию', 'error');
-            return;
-        }
-        try {
-            console.log('Сохранение изменений собеседования, interviewId:', interviewId);
-            const response = await axios.put(`http://localhost:1111/api/interviews/${interviewId}`, {
-                date: new Date(editingInterview.date).toISOString(),
-                position: editingInterview.position
-            }, {
-                headers: {
-                    Authorization: `Bearer ${sessionStorage.getItem('token')}`
-                }
-            });
-            console.log('Ответ сервера:', response.data);
-            setInterviews(prev => prev.map(i =>
-                i.id === interviewId
-                    ? { ...i, date: new Date(editingInterview.date), position: editingInterview.position }
-                    : i
-            ));
-            addToast('Собеседование успешно обновлено', 'success');
-            setEditingInterview(null);
-        } catch (error) {
-            console.error('Ошибка обновления собеседования:', error.response?.data || error.message);
-            addToast(`Ошибка при обновлении собеседования: ${error.response?.data || error.message}`, 'error');
-        }
-    };
-
-    const handleEditInterviewCancel = () => {
-        setEditingInterview(null);
     };
 
     const handleEditStart = (msg) => {
@@ -243,98 +143,13 @@ const NotificationChat = ({ selectedChat }) => {
         }
     };
 
-    const renderInterviewTile = ({ date, view }) => {
-        if (view !== 'month') return null;
-
-        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        const dayInterviews = interviews.filter(interview => {
-            const interviewDate = new Date(interview.date).toISOString().slice(0, 10);
-            return interviewDate === dateStr;
-        });
-
-        console.log('Rendering interviews for date:', dateStr, 'Interviews:', dayInterviews);
-
-        return (
-            <div className={styles.interviewTile}>
-                {dayInterviews.map(interview => (
-                    <div
-                        key={interview.id}
-                        className={styles.interviewItem}
-                        onClick={(e) => toggleInterviewMenu(interview.id, e)}
-                        ref={menuRef}
-                    >
-                        {editingInterview && editingInterview.id === interview.id ? (
-                            <div className={styles.editForm}>
-                                <input
-                                    type="datetime-local"
-                                    className={styles.editInput}
-                                    value={editingInterview.date}
-                                    onChange={(e) => setEditingInterview({ ...editingInterview, date: e.target.value })}
-                                    min={new Date().toISOString().slice(0, 16)}
-                                />
-                                <input
-                                    type="text"
-                                    className={styles.editInput}
-                                    value={editingInterview.position}
-                                    onChange={(e) => setEditingInterview({ ...editingInterview, position: e.target.value })}
-                                    placeholder="Позиция"
-                                />
-                                <div className={styles.editActions}>
-                                    <button onClick={() => handleEditInterviewSave(interview.id)}>Сохранить</button>
-                                    <button onClick={handleEditInterviewCancel}>Отмена</button>
-                                </div>
-                            </div>
-                        ) : openInterviewMenu === interview.id ? (
-                            <div className={styles.menuButtons}>
-                                <button
-                                    className={styles.editButton}
-                                    onClick={(e) => handleEditInterviewStart(interview, e)}
-                                >
-                                    Обновить
-                                </button>
-                                <button
-                                    className={styles.deleteButton}
-                                    onClick={() => handleDeleteInterview(interview.id)}
-                                >
-                                    Удалить
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <span className={styles.interviewPosition}>{interview.position}</span>
-                                <span className={styles.interviewTime}>
-                                    {new Date(interview.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                                <span className={styles.interviewPerson}>
-                                    {userRole === 'Кандидат' ? `${interview.hrFirstName} ${interview.hrLastName}` : `${interview.candidateFirstName} ${interview.candidateLastName}`}
-                                </span>
-                            </>
-                        )}
-                    </div>
-                ))}
-            </div>
-        );
-    };
-
     return (
         <div className={styles.chatWindow}>
             <div className={styles.chatHeader}>
                 {selectedChat.recipientId === 'interviews' ? 'Собеседования' : selectedChat.recipientName}
             </div>
             {selectedChat.recipientId === 'interviews' ? (
-                <div className={styles.interviewCalendar}>
-                    <Calendar
-                        tileContent={renderInterviewTile}
-                        className={styles.customCalendar}
-                        minDate={new Date()}
-                        showNeighboringMonth={false}
-                        locale="ru-RU"
-                        formatShortWeekday={(locale, date) => {
-                            const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-                            return weekdays[date.getDay() === 0 ? 6 : date.getDay() - 1];
-                        }}
-                    />
-                </div>
+                <InterviewCalendar userRole={userRole} />
             ) : (
                 <div className={styles.messages}>
                     {Array.isArray(messages) && messages.length > 0 ? (

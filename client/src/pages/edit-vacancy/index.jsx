@@ -34,7 +34,7 @@ const VacancyEdit = () => {
         if (savedVacancy) {
             const parsed = JSON.parse(savedVacancy);
             setFormData({
-                position_title: parsed.position_title,
+                position_title: parsed.position,
                 department: parsed.department,
                 requirements: parsed.requirements,
                 description: parsed.description,
@@ -42,6 +42,7 @@ const VacancyEdit = () => {
                 salary: parsed.salary,
                 id: parsed.vacancies_id
             });
+            console.log(savedVacancy);
         }
     }, []);
 
