@@ -16,6 +16,8 @@ import Candidates from "@pages/candidates";
 import CreateVacancy from "@pages/create-vacancy";
 import VacancyEdit from "@pages/edit-vacancy";
 import InviteCandidate from "@pages/invite-candidate";
+import Report from "@pages/report";
+
 function App() {
     return (
         <Router>
@@ -40,6 +42,7 @@ function App() {
                         <Route path="/candidates" element={<Candidates />} />
 
                         <Route path="/candidates/invite" element={<InviteCandidate />} />
+                        <Route path="/report/:interviewId" element={<Report />} />
                     </Routes>
                 </main>
                 <Footer />

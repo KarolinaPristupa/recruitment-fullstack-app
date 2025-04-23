@@ -1,0 +1,147 @@
+@use '@/variables' as *;
+
+.container {
+  background: linear-gradient(to bottom, rgba($second-accent-color, 0.05), rgba($first-accent-color, 0.1));
+  backdrop-filter: blur(12px);
+  border-radius: 15px;
+  padding: 2.5rem;
+  max-width: 800px;
+  margin: 2rem auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    color: $second-accent-color;
+    text-align: center;
+    margin-bottom: 2.5rem;
+    margin-top: 0;
+    font-size: 2.2rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid rgba($second-accent-color, 0.3);
+    border-radius: 10px;
+    font-family: $font-family;
+    font-size: 1rem;
+    color: $second-accent-color;
+    transition: all 0.3s;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: $second-accent-color;
+      box-shadow: 0 0 8px rgba($second-accent-color, 0.2);
+      outline: none;
+    }
+
+    &::placeholder {
+      color: rgba($second-accent-color, 0.5);
+    }
+
+    &[type="text"]:read-only,
+    &[type="number"]:read-only {
+      background: rgba($second-accent-color, 0.05);
+      color: rgba($second-accent-color, 0.7);
+      cursor: not-allowed;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  select {
+    appearance: none;
+    background: url("data:image/svg+xml;utf8,<svg fill='%23#{str-slice(#{$second-accent-color}, 2)}' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")
+    no-repeat right 1rem center/15px;
+  }
+
+  label {
+    font-weight: 600;
+    color: $second-accent-color;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .row {
+      flex-direction: row;
+      gap: 1.5rem;
+
+      > * {
+        flex: 1;
+      }
+    }
+  }
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+
+  button {
+    padding: 1.2rem 2rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 1rem;
+  }
+
+  button:first-child {
+    background: #6c757d;
+    color: white;
+
+    &:hover {
+      background: darken(#6c757d, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(#6c757d, 0.3);
+    }
+  }
+
+  button:last-child {
+    background: $second-accent-color;
+    color: white;
+
+    &:hover {
+      background: $first-accent-color;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba($second-accent-color, 0.3);
+    }
+  }
+}
+
+.error {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  background: rgba(255, 0, 0, 0.1);
+  border: 2px solid rgba(255, 0, 0, 0.3);
+  color: #ff4444;
+}

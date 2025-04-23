@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/interviews")
@@ -102,6 +103,44 @@ public class InterviewController {
         } catch (Exception e) {
             logger.error("Error updating interview: {}", e.getMessage(), e);
             return ResponseEntity.status(400).body("Ошибка при обновлении собеседования: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/result")
+    public ResponseEntity<?> updateInterviewResult(
+            @PathVariable("id") Integer interviewId,
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody UpdateInterviewResultRequest request
+    ) {
+        try {
+            String token = authHeader.substring(7);
+            String email = jwtUtil.extractUsername(token);
+            String role = jwtUtil.extractClaim(token, claims -> claims.get("role", String.class));
+            if (!jwtUtil.isTokenValid(token, email)) {
+                logger.warn("Invalid or expired token for email: {}", email);
+                return ResponseEntity.status(401).body("Недействительный или просроченный токен");
+            }
+            if (request.getResult() == null || request.getResult().trim().isEmpty()) {
+                return ResponseEntity.status(400).body("Результат не указан");
+            }
+            Interview updatedInterview = interviewService.updateInterviewResult(interviewId, email, role, request.getResult());
+            logger.info("Interview result updated: id={}, result={}", interviewId, request.getResult());
+            return ResponseEntity.ok(updatedInterview);
+        } catch (Exception e) {
+            logger.error("Error updating interview result: {}", e.getMessage(), e);
+            return ResponseEntity.status(400).body("Ошибка при обновлении результата собеседования: " + e.getMessage());
+        }
+    }
+
+    public static class UpdateInterviewResultRequest {
+        private String result;
+
+        public String getResult() {
+            return result;
+        }
+
+        public void setResult(String result) {
+            this.result = result;
         }
     }
 

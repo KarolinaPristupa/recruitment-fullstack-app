@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,7 +66,7 @@ public class InterviewService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         User recipient;
 
-        if ("CANDIDATE".equals(role)) {
+        if ("Кандидат".equals(role)) {
             if (!interview.getCandidate().getUser().getEmail().equals(email)) {
                 logger.warn("Candidate {} not authorized to delete interview {}", email, interviewId);
                 throw new RuntimeException("Not authorized to delete this interview");
@@ -110,7 +111,7 @@ public class InterviewService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         User recipient;
 
-        if ("CANDIDATE".equals(role)) {
+        if ("Кандидат".equals(role)) {
             if (!interview.getCandidate().getUser().getEmail().equals(email)) {
                 logger.warn("Candidate {} not authorized to update interview {}", email, interviewId);
                 throw new RuntimeException("Not authorized to update this interview");
@@ -175,4 +176,52 @@ public class InterviewService {
         interviewRepository.save(interview);
         logger.info("Interview created: id={}", interview.getInterviewId());
     }
+
+    @Transactional
+    public Interview updateInterviewResult(Integer interviewId, String email, String role, String newResult) {
+        logger.info("Updating interview result: id={}, userEmail={}, role={}, newResult={}", interviewId, email, role, newResult);
+        Optional<Interview> interviewOpt = interviewRepository.findById(interviewId);
+        if (interviewOpt.isEmpty()) {
+            logger.error("Interview not found: id={}", interviewId);
+            throw new RuntimeException("Interview not found");
+        }
+
+        Interview interview = interviewOpt.get();
+        User sender = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        User recipient;
+
+        if ("HR".equals(role)) {
+            if (!interview.getVacancy().getEmployee().getUser().getEmail().equals(email)) {
+                logger.warn("HR {} not authorized to update interview {}", email, interviewId);
+                throw new RuntimeException("Not authorized to update this interview");
+            }
+            recipient = interview.getCandidate().getUser();
+        } else {
+            logger.error("Invalid role for updating result: {}", role);
+            throw new RuntimeException("Only HR can update interview result");
+        }
+
+        if (!Arrays.asList("Принят", "Отклонён").contains(newResult)) {
+            logger.error("Invalid result value: {}", newResult);
+            throw new RuntimeException("Result must be 'Принят' or 'Отклонён'");
+        }
+
+        interview.setResult(newResult);
+        Interview updatedInterview = interviewRepository.save(interview);
+        logger.info("Interview result updated: id={}", interviewId);
+
+        notificationPublisher.notifyObservers(
+                "INTERVIEW_RESULT_UPDATED",
+                updatedInterview,
+                sender,
+                recipient
+        );
+        logger.info("Notification sent for INTERVIEW_RESULT_UPDATED: interviewId={}, sender={}, recipient={}",
+                interviewId, sender.getEmail(), recipient.getEmail());
+
+        return updatedInterview;
+    }
+
+
 }
