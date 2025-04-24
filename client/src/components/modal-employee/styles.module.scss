@@ -225,3 +225,20 @@
 .cancel-btn:hover {
   opacity: 0.85;
 }
+.currency-toggle {
+  padding: 5px 10px;
+  font-size: 0.9rem;
+  background: $first-accent-color;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  &:hover {
+    background: darken($first-accent-color, 10%);
+  }
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
