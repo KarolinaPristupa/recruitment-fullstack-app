@@ -124,18 +124,54 @@ const Vacancies = () => {
         }
     };
 
+    const handleGenerateReport = async () => {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            setToast({ message: "Токен отсутствует. Пожалуйста, войдите.", type: "error" });
+            return;
+        }
+
+        try {
+            const response = await axios.get("http://localhost:1111/api/statistics/interview-report", {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob'
+            });
+
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Interview_Statistics_${new Date().toISOString().replace(/[:.]/g, '-')}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            setToast({ message: "Отчет успешно сгенерирован", type: "success" });
+        } catch (error) {
+            console.error("Ошибка генерации отчета:", error);
+            setToast({ message: "Ошибка при генерации отчета.", type: "error" });
+        }
+    };
+
     if (loading) return <div>Загрузка...</div>;
 
     return (
         <>
             <div className={styles["top-controls"]}>
                 {currentUser?.role === "HR" && (
-                    <button
-                        className={styles["create-button"]}
-                        onClick={() => navigate("/vacancies/create")}
-                    >
-                        Создать вакансию
-                    </button>
+                    <>
+                        <button
+                            className={styles["create-button"]}
+                            onClick={() => navigate("/vacancies/create")}
+                        >
+                            Создать вакансию
+                        </button>
+                        <button
+                            className={styles["report-button"]}
+                            onClick={handleGenerateReport}
+                        >
+                            Отчет
+                        </button>
+                    </>
                 )}
                 {currentUser?.role === "Кандидат" && (
                     <button

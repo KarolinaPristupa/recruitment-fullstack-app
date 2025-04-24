@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from "@pages/home";
 import About from '@pages/about';
 import Account from '@pages/account';
-import AdminPage from "@pages/admin";
 import CandidatePage from "@pages/candidate";
 import EmployeePage from "@pages/employee";
 import Vacancies from "@pages/vacancies";
@@ -29,7 +28,6 @@ function App() {
                         <Route path="/about" element={<About />} />
                         <Route path="/account" element={<Account />} />
 
-                        <Route path="/admin" element={<AdminPage />} />
                         <Route path="/candidate" element={<CandidatePage />} />
                         <Route path="/employee" element={<EmployeePage />} />
 

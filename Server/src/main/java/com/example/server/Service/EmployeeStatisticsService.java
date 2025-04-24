@@ -5,6 +5,7 @@ import com.example.server.Models.Employee;
 import com.example.server.Models.Interview;
 import com.example.server.Repository.InterviewRepository;
 import com.example.server.Service.strategy.EmployeeMetricStrategy;
+import com.example.server.Service.strategy.SuccessRateMetricStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,11 +22,18 @@ public class EmployeeStatisticsService {
     private static final Logger logger = LoggerFactory.getLogger(EmployeeStatisticsService.class);
 
     private final InterviewRepository interviewRepository;
-    private final EmployeeMetricStrategy metricStrategy;
+    private final SuccessRateMetricStrategy successRateMetricStrategy;
 
-    public EmployeeStatisticsService(InterviewRepository interviewRepository, EmployeeMetricStrategy metricStrategy) {
+    public EmployeeStatisticsService(
+            InterviewRepository interviewRepository,
+            List<EmployeeMetricStrategy> metricStrategies
+    ) {
         this.interviewRepository = interviewRepository;
-        this.metricStrategy = metricStrategy;
+        // Находим нужную стратегию из списка
+        this.successRateMetricStrategy = (SuccessRateMetricStrategy) metricStrategies.stream()
+                .filter(strategy -> strategy instanceof SuccessRateMetricStrategy)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("SuccessRateMetricStrategy not found"));
     }
 
     public EmployeeTopResponse getTopEmployee(LocalDateTime startDate) {
@@ -38,7 +47,7 @@ public class EmployeeStatisticsService {
         EmployeeTopResponse topEmployee = interviewsByEmployee.entrySet().stream()
                 .map(entry -> {
                     Employee employee = entry.getKey();
-                    double successRate = metricStrategy.calculateMetric(entry.getValue());
+                    double successRate = successRateMetricStrategy.calculateMetric(entry.getValue());
                     String photoUrl = employee.getUser().getPhoto() != null && !employee.getUser().getPhoto().isEmpty()
                             ? "http://localhost:1111/images/" + employee.getUser().getPhoto()
                             : "/default-photo.jpg";
@@ -47,7 +56,7 @@ public class EmployeeStatisticsService {
                             employee.getUser().getFirstName(),
                             employee.getPosition(),
                             photoUrl,
-                            Math.round(successRate) // Округляем successRate до целого
+                            Math.round(successRate)
                     );
                 })
                 .max(Comparator.comparingDouble(EmployeeTopResponse::getSuccessRate))
