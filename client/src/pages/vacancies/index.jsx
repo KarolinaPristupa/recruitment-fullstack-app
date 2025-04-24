@@ -6,6 +6,7 @@ import Modal_employee from "@components/modal-employee";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import Toast from "@components/toast/index.jsx";
+
 const Vacancies = () => {
     const [vacancies, setVacancies] = useState([]);
     const [filteredVacancies, setFilteredVacancies] = useState([]);
@@ -20,7 +21,11 @@ const Vacancies = () => {
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
-        if (!token) return console.error("Токен отсутствует");
+        if (!token) {
+            console.error("Токен отсутствует");
+            setToast({ message: "Токен отсутствует. Пожалуйста, войдите.", type: "error" });
+            return;
+        }
 
         const decoded = jwtDecode(token);
         setCurrentUser({ email: decoded.sub, role: decoded.role });
@@ -38,11 +43,11 @@ const Vacancies = () => {
                 setFilteredVacancies(enrichedData);
             } catch (error) {
                 console.error("Ошибка загрузки:", error);
+                setToast({ message: "Ошибка загрузки вакансий.", type: "error" });
             } finally {
                 setLoading(false);
             }
         };
-
 
         fetchData();
 
@@ -79,8 +84,10 @@ const Vacancies = () => {
         let updatedFavorites;
         if (favorites.includes(id)) {
             updatedFavorites = favorites.filter(favId => favId !== id);
+            setToast({ message: "Вакансия удалена из избранного", type: "success" });
         } else {
             updatedFavorites = [...favorites, id];
+            setToast({ message: "Вакансия добавлена в избранное", type: "success" });
         }
 
         setFavorites(updatedFavorites);
@@ -89,6 +96,33 @@ const Vacancies = () => {
 
     const handleOpenModal = (vacancy) => setSelectedVacancy(vacancy);
     const handleCloseModal = () => setSelectedVacancy(null);
+
+    const handleMatchVacancy = async () => {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            setToast({ message: "Токен отсутствует. Пожалуйста, войдите.", type: "error" });
+            return;
+        }
+
+        try {
+            const response = await axios.get("http://localhost:1111/api/vacancies/match", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const matchedVacancy = response.data;
+            if (matchedVacancy) {
+                setSelectedVacancy({
+                    ...matchedVacancy,
+                    creatorEmail: matchedVacancy.employee?.user?.email || null
+                });
+                setToast({ message: "Найдена подходящая вакансия!", type: "success" });
+            } else {
+                setToast({ message: "Подходящих вакансий не найдено.", type: "warning" });
+            }
+        } catch (error) {
+            console.error("Ошибка подбора вакансии:", error);
+            setToast({ message: error.response?.data?.error || "Ошибка при подборе вакансии.", type: "error" });
+        }
+    };
 
     if (loading) return <div>Загрузка...</div>;
 
@@ -101,6 +135,14 @@ const Vacancies = () => {
                         onClick={() => navigate("/vacancies/create")}
                     >
                         Создать вакансию
+                    </button>
+                )}
+                {currentUser?.role === "Кандидат" && (
+                    <button
+                        className={styles["match-button"]}
+                        onClick={handleMatchVacancy}
+                    >
+                        Подобрать
                     </button>
                 )}
 
@@ -166,11 +208,11 @@ const Vacancies = () => {
                     onClose={handleCloseModal}
                     onDelete={(id) => {
                         setVacancies(prev => prev.filter(v => v.vacancies_id !== id));
+                        setFilteredVacancies(prev => prev.filter(v => v.vacancies_id !== id));
                     }}
                     toast={toast}
                     setToast={setToast}
                 />
-
             )}
 
             {toast && (

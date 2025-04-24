@@ -13,5 +13,6 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
 
     Optional<Vacancy> findByPosition(String position);
 
+    List<Vacancy> findByStatus(String status);
 }
 

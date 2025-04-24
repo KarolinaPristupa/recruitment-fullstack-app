@@ -5,7 +5,6 @@ import com.example.server.Models.Vacancy;
 import com.example.server.Service.VacancyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,18 +16,19 @@ import java.util.Map;
 @RequestMapping("/api/vacancies")
 public class VacanciesController {
 
-    private VacancyService vacancyService;
+    private final VacancyService vacancyService;
     private final JwtUtil jwtUtil;
+    private static final Logger logger = LoggerFactory.getLogger(VacanciesController.class);
 
     public VacanciesController(VacancyService vacancyService, JwtUtil jwtUtil) {
         this.vacancyService = vacancyService;
         this.jwtUtil = jwtUtil;
     }
-    private static final Logger logger = LoggerFactory.getLogger(VacanciesController.class);
+
     @GetMapping
     public List<Vacancy> getAllVacancies() {
         List<Vacancy> vacancies = vacancyService.getAllVacancies();
-        System.out.println("Отправляем вакансии: " + vacancies);
+        logger.info("Отправляем вакансии: {}", vacancies.size());
         return vacancies;
     }
 
@@ -78,7 +78,6 @@ public class VacanciesController {
         }
     }
 
-
     @DeleteMapping("/vacancies")
     public ResponseEntity<?> deleteVacancy(@RequestBody Map<String, Object> data) {
         try {
@@ -89,6 +88,7 @@ public class VacanciesController {
 
             return ResponseEntity.ok().body(Map.of("success", true));
         } catch (Exception e) {
+            logger.error("Ошибка при удалении вакансии: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
         }
     }
@@ -112,9 +112,43 @@ public class VacanciesController {
 
             return ResponseEntity.ok().body(Map.of("success", true));
         } catch (Exception e) {
+            logger.error("Ошибка при обновлении вакансии: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body(Map.of("success", false, "error", e.getMessage()));
         }
     }
 
+    @GetMapping("/match")
+    public ResponseEntity<?> matchVacancy(@RequestHeader("Authorization") String authHeader) {
+        try {
+            logger.info("Получен запрос на подбор вакансии");
 
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                logger.warn("Токен отсутствует или неверный формат: {}", authHeader);
+                return ResponseEntity.status(401).body(Map.of("error", "Токен отсутствует или неверный формат"));
+            }
+
+            String token = authHeader.substring(7);
+            String email = jwtUtil.extractUsername(token);
+
+            if (!jwtUtil.isTokenValid(token, email)) {
+                logger.warn("Недействительный или просроченный токен для email: {}", email);
+                return ResponseEntity.status(401).body(Map.of("error", "Недействительный или просроченный токен"));
+            }
+
+            Vacancy matchedVacancy = vacancyService.findBestMatchingVacancy(email);
+            if (matchedVacancy == null) {
+                logger.info("Подходящих вакансий не найдено для email: {}", email);
+                return ResponseEntity.ok(null); // Возвращаем null, если нет подходящих вакансий
+            }
+
+            logger.info("Найдена подходящая вакансия: position={}", matchedVacancy.getPosition());
+            return ResponseEntity.ok(matchedVacancy);
+        } catch (RuntimeException e) {
+            logger.error("Ошибка при подборе вакансии: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Внутренняя ошибка сервера при подборе вакансии: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Внутренняя ошибка сервера"));
+        }
+    }
 }
