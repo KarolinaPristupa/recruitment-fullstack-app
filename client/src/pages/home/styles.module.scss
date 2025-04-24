@@ -1,0 +1,135 @@
+@use '@/variables' as *;
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px $common-space;
+}
+
+.title {
+  font-size: 2.1rem;
+  margin-bottom: 20px;
+  margin-left: $common-space;
+  color: $text-color;
+}
+
+.subtitle {
+  font-size: 2rem;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  margin-left: $common-space;
+  color: $text-color;
+}
+
+.text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  text-align: justify;
+  text-indent: $common-space;
+  color: $text-color;
+}
+
+.topEmployee {
+  margin: 20px 0;
+  text-align: center;
+
+  .employeeCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 400px;
+    margin: 0 auto;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .employeePhoto {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .employeeName {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: $second-accent-color;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .employeeInfo {
+    text-align: left;
+
+    p {
+      font-size: 1.1rem;
+      margin: 5px 0;
+      color: $first-accent-color;
+
+      strong {
+        color: $first-accent-color;
+      }
+    }
+  }
+}
+
+.infoSection {
+  margin-top: 40px;
+}
+
+.formulaContainer {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 20px auto;
+  max-width: 600px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.formula {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: $second-accent-color;
+
+  .formulaText {
+    margin: 0 10px;
+  }
+
+  .fraction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    margin: 0 10px;
+
+    .numerator,
+    .denominator {
+      text-align: center;
+      padding: 5px;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: $text-color;
+      transform: translateY(-50%);
+    }
+  }
+}
