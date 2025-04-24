@@ -74,12 +74,24 @@
   color: $text-color;
 }
 
-// Контейнер для сортировки
-.sort-container {
+// Контейнер для элементов управления (сортировка и экспорт)
+.controls-container {
   margin-top: $common-space;
   display: flex;
   align-items: center;
+  gap: 15px;
+}
+
+// Контейнер для сортировки
+.sort-container {
+  display: flex;
+  align-items: center;
   gap: 10px;
+}
+
+.sort-label {
+  font-size: 1.1rem;
+  color: $text-color;
 }
 
 .sort-select {
@@ -96,6 +108,22 @@
   &:focus {
     border-color: $first-accent-color;
     outline: none;
+  }
+}
+
+// Кнопка экспорта
+.export-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  background: $first-accent-color;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: darken($first-accent-color, 10%);
   }
 }
 
