@@ -43,17 +43,6 @@ const About = () => {
                 Наши HR-специалисты всегда готовы помочь вам с выбором вакансии и ответить на все ваши вопросы.
             </p>
             <HrPagination employees={employees} />
-            {/*<h2 className={styles.subtitle}>Наш офис</h2>*/}
-            {/*<div className={styles.mapContainer}>*/}
-            {/*    <iframe*/}
-            {/*        width="100%"*/}
-            {/*        height="100%"*/}
-            {/*        style={{ border: 0 }}*/}
-            {/*        loading="lazy"*/}
-            {/*        allowFullScreen*/}
-            {/*        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=БГУИР,Минск"*/}
-            {/*    ></iframe>*/}
-            {/*</div>*/}
         </div>
     );
 };
