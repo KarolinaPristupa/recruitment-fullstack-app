@@ -9,6 +9,7 @@ const Candidates = () => {
     const [loading, setLoading] = useState(true);
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [error, setError] = useState(null); // Для хранения ошибки
+    const [sortOrder, setSortOrder] = useState("asc"); // Порядок сортировки: asc (A-Z) или desc (Z-A)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -38,15 +39,42 @@ const Candidates = () => {
         setSelectedCandidate(null);
     };
 
+    // Сортировка кандидатов по навыкам
+    const sortedCandidates = [...candidates].sort((a, b) => {
+        const skillsA = a.resume?.skills || "";
+        const skillsB = b.resume?.skills || "";
+        return sortOrder === "asc"
+            ? skillsA.localeCompare(skillsB)
+            : skillsB.localeCompare(skillsA);
+    });
+
+    const handleSortChange = (event) => {
+        setSortOrder(event.target.value);
+    };
+
     if (loading) return <div>Загрузка...</div>;
     if (error) return <div>{error}</div>; // Отображение ошибки, если она есть
 
     return (
         <>
+            <div className={styles["candidates-header"]}>
+                <div className={styles["sort-container"]}>
+                    <select
+                        id="sortOrder"
+                        value={sortOrder}
+                        onChange={handleSortChange}
+                        className={styles["sort-select"]}
+                    >
+                        <option value="asc">По алфавиту (A-Z)</option>
+                        <option value="desc">По алфавиту (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+
             <div className={styles["candidates-container"]}>
-                {candidates.map((candidate, index) => (
+                {sortedCandidates.map((candidate, index) => (
                     <div
-                        key={candidate.id || `${candidate.user?.firstName}-${candidate.user?.lastName}-${index}`} // Используем индекс или другие поля
+                        key={candidate.id || `${candidate.user?.firstName}-${candidate.user?.lastName}-${index}`}
                         className={styles["candidate-card"]}
                         onClick={() => handleOpenModal(candidate)}
                     >
