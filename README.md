@@ -219,5 +219,7 @@
 - date
 
 ## Лицензия
-Apache License 2.0 © 2025 Каролина
+All rights reserved © 2025 Каролина
+Use of this software is prohibited without written permission from the author.
+Использование данного программного обеспечения запрещено без письменного разрешения автора.
 
